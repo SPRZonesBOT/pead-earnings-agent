@@ -1,3 +1,5 @@
+from announcements.watcher_bse import get_bse_announcements
+from announcements.watcher_nse import get_nse_announcements
 import schedule
 import time
 from datetime import datetime
