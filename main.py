@@ -1,42 +1,69 @@
 import logging
+from typing import List, Dict
 
 from announcements.watcher_nse import get_nse_announcements
-from announcements.watcher_bse import get_bse_announcements
 
+# ─── Logging Setup ─────────────────────────────────────────────────
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
-
 logger = logging.getLogger(__name__)
 
 
+# ─── Main Orchestrator ─────────────────────────────────────────────
 def main():
-    logger.info("Starting announcements fetch...")
+    logger.info("=" * 50)
+    logger.info("📢 Announcement Fetcher Started (NSE Only)")
+    logger.info("=" * 50)
 
-    # NSE fetch
+    all_results: List[Dict] = []
+
+    # ─── NSE ───────────────────────────────────────────────────────
+    logger.info("⏳ Fetching NSE announcements...")
     try:
-        results_nse = get_nse_announcements()
-        logger.info(f"NSE returned {len(results_nse)} items.")
+        nse_results = get_nse_announcements()
+        logger.info(f"✅ NSE returned {len(nse_results)} items.")
+        all_results.extend(nse_results)
     except Exception as e:
-        logger.error(f"NSE fetch failed: {e}")
-        results_nse = []
+        logger.error(f"❌ NSE fetch failed: {e}")
 
-    # BSE disabled stub
-    try:
-        results_bse = get_bse_announcements()
-        logger.info(f"BSE returned {len(results_bse)} items.")
-    except Exception as e:
-        logger.error(f"BSE fetch failed: {e}")
-        results_bse = []
+    # ─── BSE — Disabled ────────────────────────────────────────────
+    logger.info("⏭️  BSE is disabled. Skipping...")
 
-    all_results = results_nse + results_bse
+    # ─── Summary ───────────────────────────────────────────────────
+    logger.info("=" * 50)
+    logger.info(f"📊 Total announcements fetched: {len(all_results)}")
+    logger.info("=" * 50)
 
-    logger.info(f"Total announcements fetched: {len(all_results)}")
+    if not all_results:
+        logger.warning("⚠️  No announcements found from any source.")
+        return
 
-    for item in all_results:
-        print(item)
+    # ─── Display Results ───────────────────────────────────────────
+    print("\n" + "=" * 80)
+    print(f"{'📢 LATEST ANNOUNCEMENTS':^80}")
+    print("=" * 80)
+
+    for idx, item in enumerate(all_results, 1):
+        print(f"\n{'─' * 80}")
+        print(f"  #{idx}")
+        print(f"  🏢 Company : {item.get('company', 'N/A')}")
+        print(f"  🔖 Symbol  : {item.get('symbol', 'N/A')}")
+        print(f"  📅 Date    : {item.get('date', 'N/A')}")
+        print(f"  📝 Subject : {item.get('subject', 'N/A')}")
+        print(f"  🔗 Source  : {item.get('source', 'N/A')}")
+
+        pdf_url = item.get('pdf_url', '')
+        if pdf_url:
+            print(f"  📄 PDF     : {pdf_url}")
+
+    print("\n" + "=" * 80)
+    print(f"{'✅ DONE':^80}")
+    print("=" * 80)
 
 
+# ─── Entry Point ──────────────────────────────────────────────────
 if __name__ == "__main__":
     main()
