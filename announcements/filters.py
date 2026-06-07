@@ -1,25 +1,49 @@
+# announcements/filters.py
 import hashlib
 from typing import Dict, List
 
-# --- Keyword Filters ---
+# --- Expanded Keyword Filters ---
 RESULT_KEYWORDS = [
+    # Financial Results
     "financial results",
     "quarterly results",
+    "q1 results",
+    "q2 results",
+    "q3 results",
+    "q4 results",
+    "fy results",
     "outcome of board meeting",
     "standalone results",
     "consolidated results",
+    
+    # Documents & Filings
     "investor presentation",
     "press release",
     "unaudited financial results",
     "audited financial results",
+    "annual results",
+    "half yearly results",
+    
+    # Financial Metrics
     "earnings",
     "profit & loss",
     "balance sheet",
+    "cash flow",
     "cash flow statement",
+    
+    # Corporate Actions
+    "dividend",
     "dividend declaration",
+    "interim dividend",
+    "final dividend",
     "buyback",
+    "share buyback",
+    "bonus",
     "bonus issue",
     "rights issue",
+    "stock split",
+    "board meeting",
+    "shareholder approval",
 ]
 
 def is_result_announcement(subject: str) -> bool:
@@ -28,7 +52,7 @@ def is_result_announcement(subject: str) -> bool:
     return any(keyword in subject_lower for keyword in RESULT_KEYWORDS)
 
 # --- Duplicate Detection ---
-seen_hashes = set()  # In-memory cache (replace with Redis later)
+seen_hashes = set()
 
 def get_hash(company: str, subject: str, date: str) -> str:
     """Generate unique hash for an announcement."""
