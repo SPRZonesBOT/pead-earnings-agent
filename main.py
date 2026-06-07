@@ -32,7 +32,24 @@ RESULT_KEYWORDS = [
     "audited results",
     "unaudited results",
     "results",
-    "earnings"
+    "earnings",
+    "standalone results",
+    "consolidated results",
+    "quarter ended",
+    "year ended",
+]
+
+# Strict result phrases for better filtering
+STRICT_RESULT_KEYWORDS = [
+    "financial results",
+    "quarterly results",
+    "annual results",
+    "audited financial results",
+    "unaudited financial results",
+    "standalone financial results",
+    "consolidated financial results",
+    "quarter ended",
+    "year ended",
 ]
 
 # Secondary announcements
@@ -58,7 +75,9 @@ MEETING_KEYWORDS = [
     "meeting of board",
     "board of directors meeting",
     "intimation of board meeting",
-    "notice of board meeting"
+    "notice of board meeting",
+    "board to consider",
+    "meeting scheduled"
 ]
 
 # Important companies ko priority dene ke liye
@@ -107,6 +126,28 @@ def contains_any(text, keywords):
 def is_focus_company(company):
     company_upper = (company or "").upper()
     return any(name in company_upper for name in FOCUS_COMPANIES)
+
+
+def is_strict_result_subject(subject):
+    subject_lower = (subject or "").lower()
+    return contains_any(subject_lower, STRICT_RESULT_KEYWORDS)
+
+
+def is_result_subject(subject):
+    subject_lower = (subject or "").lower()
+    return contains_any(subject_lower, RESULT_KEYWORDS)
+
+
+def is_result_meeting_subject(subject):
+    """
+    Sirf wahi subject True hoga jisme:
+    - board meeting/intimation ho
+    - aur saath me result-related wording ho
+    """
+    subject_lower = (subject or "").lower()
+    has_meeting = contains_any(subject_lower, MEETING_KEYWORDS)
+    has_result = contains_any(subject_lower, RESULT_KEYWORDS)
+    return has_meeting and has_result
 
 
 def parse_date_from_cell(text):
@@ -194,8 +235,7 @@ def extract_future_dates_from_subject(subject):
                 except ValueError:
                     continue
 
-    unique_dates = sorted(set(found_dates))
-    return unique_dates
+    return sorted(set(found_dates))
 
 
 def fetch_page(url):
@@ -273,11 +313,11 @@ def classify_announcements(rows):
         company = row["company"]
         subject = row["subject"]
 
-        subject_lower = subject.lower()
-
-        is_result = contains_any(subject_lower, RESULT_KEYWORDS)
-        is_secondary = contains_any(subject_lower, SECONDARY_KEYWORDS)
-        is_meeting = contains_any(subject_lower, MEETING_KEYWORDS)
+        is_result = is_result_subject(subject)
+        is_strict_result = is_strict_result_subject(subject)
+        is_secondary = contains_any(subject, SECONDARY_KEYWORDS)
+        is_result_meeting = is_result_meeting_subject(subject)
+        focus_flag = is_focus_company(company)
 
         # --------------------------------------------------------
         # 1) Recent result announcements
@@ -287,7 +327,8 @@ def classify_announcements(rows):
                 "announcement_date": ann_date,
                 "company": company,
                 "subject": subject,
-                "focus": is_focus_company(company)
+                "focus": focus_flag,
+                "strict": is_strict_result
             })
 
             if ann_date == today:
@@ -296,7 +337,7 @@ def classify_announcements(rows):
                     "company": company,
                     "date": ann_date,
                     "subject": subject,
-                    "focus": is_focus_company(company)
+                    "focus": focus_flag
                 })
 
         # --------------------------------------------------------
@@ -307,14 +348,14 @@ def classify_announcements(rows):
                 "announcement_date": ann_date,
                 "company": company,
                 "subject": subject,
-                "focus": is_focus_company(company)
+                "focus": focus_flag
             })
 
         # --------------------------------------------------------
         # 3) Upcoming result-related board meeting notices
-        #    Notice may be filed today, but meeting date future me hoti hai
+        #    Sirf strict result-meeting subjects hi lenge
         # --------------------------------------------------------
-        if notice_cutoff <= ann_date <= today and is_meeting and is_result:
+        if notice_cutoff <= ann_date <= today and is_result_meeting:
             candidate_dates = extract_future_dates_from_subject(subject)
 
             for meeting_date in candidate_dates:
@@ -324,7 +365,7 @@ def classify_announcements(rows):
                         "meeting_date": meeting_date,
                         "company": company,
                         "subject": subject,
-                        "focus": is_focus_company(company)
+                        "focus": focus_flag
                     }
                     upcoming_result_meetings.append(item)
 
@@ -334,7 +375,7 @@ def classify_announcements(rows):
                             "company": company,
                             "date": meeting_date,
                             "subject": subject,
-                            "focus": is_focus_company(company)
+                            "focus": focus_flag
                         })
 
     recent_results = dedupe_items(
@@ -357,10 +398,35 @@ def classify_announcements(rows):
         ["type", "date", "company", "subject"]
     )
 
-    recent_results.sort(key=lambda x: (not x["focus"], -x["announcement_date"].toordinal(), x["company"]))
-    recent_others.sort(key=lambda x: (not x["focus"], -x["announcement_date"].toordinal(), x["company"]))
-    upcoming_result_meetings.sort(key=lambda x: (not x["focus"], x["meeting_date"].toordinal(), x["company"]))
-    todays_pead_alerts.sort(key=lambda x: (not x["focus"], x["date"].toordinal(), x["company"]))
+    recent_results.sort(
+        key=lambda x: (
+            not x["focus"],
+            not x["strict"],
+            -x["announcement_date"].toordinal(),
+            x["company"]
+        )
+    )
+    recent_others.sort(
+        key=lambda x: (
+            not x["focus"],
+            -x["announcement_date"].toordinal(),
+            x["company"]
+        )
+    )
+    upcoming_result_meetings.sort(
+        key=lambda x: (
+            not x["focus"],
+            x["meeting_date"].toordinal(),
+            x["company"]
+        )
+    )
+    todays_pead_alerts.sort(
+        key=lambda x: (
+            not x["focus"],
+            x["date"].toordinal(),
+            x["company"]
+        )
+    )
 
     return {
         "recent_results": recent_results,
@@ -380,7 +446,7 @@ def print_results(data):
     today = datetime.now().date()
 
     print("\n" + "=" * 90)
-    print("AI FIESTA | BSE RESULT + ANNOUNCEMENT + PEAD TRACKER")
+    print("AI FIESTA | BSE RESULT + ANNOUNCEMENT + PEAD TRACKER | UPGRADED")
     print("=" * 90)
     print(f"Run Time      : {datetime.now().strftime('%d-%m-%Y %H:%M:%S')}")
     print(f"Recent Window : Last {PAST_DAYS} days")
@@ -425,7 +491,8 @@ def print_results(data):
     if data["recent_results"]:
         for idx, item in enumerate(data["recent_results"], start=1):
             tag = "IMPORTANT" if item["focus"] else "NORMAL"
-            print(f"{idx}. [{tag}] {item['company']}")
+            strict_tag = "STRICT" if item.get("strict") else "BROAD"
+            print(f"{idx}. [{tag}] [{strict_tag}] {item['company']}")
             print(f"   Announcement Date : {item['announcement_date'].strftime('%d-%m-%Y')}")
             print(f"   Subject           : {item['subject']}")
             print("-" * 90)
