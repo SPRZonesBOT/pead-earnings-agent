@@ -1,78 +1,71 @@
+import logging
+import time
+from database.db import db  # Aapka sahi DB import
 from announcements.watcher_bse import get_bse_announcements
 from announcements.watcher_nse import get_nse_announcements
-import schedule
-import time
-from datetime import datetime
-from announcements.watcher_bse import watch_bse          # ✅ Updated import
-from announcements.watcher_nse import watch_nse          # ✅ Updated import
-from notifier_telegram import send_telegram_alert
-from database.db import db                               # ✅ Updated import
-from config import POLLING_INTERVAL
-import logging
 
-# Setup logging
+# ----------------------------
+# Logging Setup (Terminal mein clear output dekhne ke liye)
+# ----------------------------
 logging.basicConfig(
-    filename="logs/watcher.log",
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
+logger = logging.getLogger(__name__)
 
-def run_watchers():
-    """BSE aur NSE watchers run karo"""
-    print(f"\n{'='*90}")
-    print(f"⏰ Cycle at {datetime.now().strftime('%d-%m-%Y %H:%M:%S')}")
-    print(f"{'='*90}")
-    
-    watch_bse()
-    watch_nse()
+def main():
+    logger.info("🚀 Starting PEAD Earnings Agent...")
 
-def process_announcements():
-    """Announcements ko process karo aur alerts bhejo"""
-    announcements = db.get_unprocessed_announcements()
+    # 1️⃣ Fetch BSE Announcements
+    logger.info("Fetching BSE Announcements...")
+    bse_data = get_bse_announcements()
+    logger.info(f"✅ Total BSE Announcements found: {len(bse_data)}")
+
+    # 2️⃣ Fetch NSE Announcements
+    logger.info("Fetching NSE Announcements...")
+    nse_data = get_nse_announcements()
+    logger.info(f"✅ Total NSE Announcements found: {len(nse_data)}")
+
+    # 3️⃣ Combine Data
+    all_announcements = bse_data + nse_data
+
+    if not all_announcements:
+        logger.warning("⚠️ No new announcements found right now.")
+        return
+
+    logger.info(f"📊 Processing {len(all_announcements)} total announcements...")
     
-    if announcements:
-        print(f"\n📢 Processing {len(announcements)} announcements...")
+    # Print the fetched data cleanly
+    print("\n" + "="*80)
+    print(f"{'SOURCE':<6} | {'DATE':<12} | {'COMPANY':<20} | SUBJECT")
+    print("="*80)
+    
+    for ann in all_announcements:
+        # Company name agar lamba ho toh cut kar do display ke liye
+        company = ann['company'][:18] + ".." if len(ann['company']) > 20 else ann['company']
         
-        for ann_id, source, company, symbol, subject in announcements:
-            # Send Telegram alert
-            send_telegram_alert(
-                company=company,
-                subject=subject,
-                source=source,
-                ann_datetime=datetime.now().isoformat(),
-                pdf_link=None
-            )
-            
-            # Mark as processed
-            db.mark_announcement_processed(ann_id)
-            
-            logging.info(f"Processed: {company} - {source}")
+        print(f"{ann['source']:<6} | {ann['date']:<12} | {company:<20} | {ann['subject']}")
+        
+        # -------------------------------------------------------------
+        # 💾 DATABASE MEIN SAVE KARNE KA LOGIC (Yahan add karein)
+        # -------------------------------------------------------------
+        # Example:
+        # try:
+        #     db.collection.insert_one(ann)  # Agar MongoDB hai
+        #     # ya
+        #     # db.execute("INSERT INTO...", (ann['date'], ...)) # Agar SQL hai
+        # except Exception as e:
+        #     logger.error(f"DB Save Error: {e}")
 
-def job_scheduler():
-    """Main scheduler"""
-    schedule.every(POLLING_INTERVAL).seconds.do(run_watchers)
-    schedule.every(1).minutes.do(process_announcements)
-    
-    print("🟢 Scheduler started...")
-    print(f"📊 Polling interval: {POLLING_INTERVAL} seconds")
-    
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+    print("="*80)
+    logger.info("🎉 Task completed successfully!")
 
 if __name__ == "__main__":
-    try:
-        print(f"""
-╔═══════════════════════════════════════════════════════════╗
-║     🚀 PEAD AGENT - Live Result Announcements Monitor     ║
-║     Version 1.0 - MVP (Ingestion + Alerts)                 ║
-╚═══════════════════════════════════════════════════════════╝
-        """)
-        
-        job_scheduler()
-    
-    except KeyboardInterrupt:
-        print("\n🛑 Scheduler stopped by user")
-    except Exception as e:
-        print(f"❌ Fatal error: {e}")
-        logging.error(f"Fatal error: {e}")
+    # Script ko ek baar run karne ke liye:
+    main()
+
+    # (Optional) Agar aapko isko har 1 ghante (3600 sec) mein auto-run karna hai, toh upar wali line hata kar neeche wala code use karein:
+    # while True:
+    #     main()
+    #     logger.info("Waiting for 1 hour before next fetch...")
+    #     time.sleep(3600)
