@@ -1,57 +1,26 @@
-import logging
+import schedule
+import time
 from announcements.watcher_nse import get_nse_announcements
 from announcements.watcher_bse import get_bse_announcements
+from announcements.filters import process_announcements
 
-# ✅ Logger setup fixed
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-)
+def run_watcher():
+    print("\n🔍 Checking for new announcements...")
+    nse_items = get_nse_announcements()
+    bse_items = get_bse_announcements()
 
-logger = logging.getLogger(__name__)   # <-- This line was missing
+    all_items = nse_items + bse_items
+    filtered = process_announcements(all_items)
 
-
-def main():
-    logger.info("🚀 Starting PEAD Earnings Agent...")
-
-    # NSE Announcements
-    try:
-        logger.info("Fetching NSE Announcements...")
-        nse_data = get_nse_announcements()
-        logger.info(f"NSE: {len(nse_data)} announcements found")
-    except Exception as e:
-        logger.error(f"NSE fetch crashed: {e}")
-        nse_data = []
-
-    # BSE Announcements
-    try:
-        logger.info("Fetching BSE Announcements...")
-        bse_data = get_bse_announcements()
-        logger.info(f"BSE: {len(bse_data)} announcements found")
-    except Exception as e:
-        logger.error(f"BSE fetch crashed: {e}")
-        bse_data = []
-
-    all_announcements = nse_data + bse_data
-
-    if not all_announcements:
-        logger.warning("⚠️ No announcements found. This is expected if markets are closed or no new filings today.")
-        return
-
-    # Print results
-    print("\n" + "=" * 110)
-    print(f"{'SOURCE':<8} | {'DATE':<14} | {'COMPANY':<30} | SUBJECT")
-    print("=" * 110)
-
-    for ann in all_announcements:
-        company = ann["company"]
-        if len(company) > 28:
-            company = company[:27] + ".."
-        print(f"{ann['source']:<8} | {ann['date']:<14} | {company:<30} | {ann['subject']}")
-
-    print("=" * 110)
-    logger.info("✅ Done!")
-
+    for item in filtered:
+        print(f"🔔 NEW RESULT ALERT: {item['company']} — {item['subject']} (Source: {item['source']})")
+        # TODO: Trigger Document Fetcher (Module 2) here
 
 if __name__ == "__main__":
-    main()
+    print("✅ Announcement Watcher Started (Ctrl+C to exit)")
+    run_watcher()  # First run immediately
+    schedule.every(5).minutes.do(run_watcher)  # Then every 5 mins
+
+    while True:
+        schedule.run_pending()
+        time.sleep(30)
