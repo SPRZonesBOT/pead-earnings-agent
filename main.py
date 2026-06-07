@@ -1,172 +1,486 @@
+import re
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 
-# ─────────────────────────────────────────────
-# CONFIGURATION
-# ─────────────────────────────────────────────
+# ============================================================
+# CONFIG
+# ============================================================
 
-# Priority 1 (Main Focus): Results
-# Priority 2 (Secondary): Other key announcements
-PRIORITY_KEYWORDS = [
-    "Financial Results",        # ⭐ MAIN FOCUS
-    "Quarterly Results",        # ⭐ MAIN FOCUS
-    "Annual Results",           # ⭐ MAIN FOCUS
-    "Unaudited Results",        # ⭐ MAIN FOCUS
-    "Audited Results",          # ⭐ MAIN FOCUS
+BSE_ANNOUNCEMENTS_URL = "https://www.bseindia.com/corporates/ann.html"
+
+PAST_DAYS = 7
+FUTURE_DAYS = 15
+LOOKBACK_NOTICE_DAYS = 45
+REQUEST_TIMEOUT = 20
+
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/125.0.0.0 Safari/537.36"
+    ),
+    "Accept-Language": "en-US,en;q=0.9",
+    "Referer": "https://www.bseindia.com/"
+}
+
+# Main focus: result-related subjects
+RESULT_KEYWORDS = [
+    "financial results",
+    "quarterly results",
+    "annual results",
+    "audited results",
+    "unaudited results",
+    "results",
+    "earnings"
 ]
 
+# Secondary announcements
 SECONDARY_KEYWORDS = [
-    "Dividend",                 # Dividend announcements
-    "Board Meeting",            # Board meeting updates
-    "Bonus Issue",              # Bonus shares
-    "Rights Issue",             # Rights issue
-    "Merger",                   # Merger & Acquisition
-    "Acquisition",              # Company buyouts
-    "Buyback",                  # Share buyback
-    "Stock Split",              # Stock split
-    "AGM",                      # Annual General Meeting
-    "EGM",                      # Extraordinary General Meeting
+    "dividend",
+    "board meeting",
+    "bonus",
+    "stock split",
+    "split",
+    "buyback",
+    "rights issue",
+    "merger",
+    "acquisition",
+    "agm",
+    "egm",
+    "fund raising",
+    "preferential issue"
 ]
 
-DAYS_TO_CHECK = 7  # Last 7 days ka data
+# Result-related meeting/intimation keywords
+MEETING_KEYWORDS = [
+    "board meeting",
+    "meeting of board",
+    "board of directors meeting",
+    "intimation of board meeting",
+    "notice of board meeting"
+]
 
-# ─────────────────────────────────────────────
-# BSE ANNOUNCEMENT FETCHER
-# ─────────────────────────────────────────────
+# Important companies ko priority dene ke liye
+FOCUS_COMPANIES = [
+    "RELIANCE",
+    "TCS",
+    "INFOSYS",
+    "HDFCBANK",
+    "ICICIBANK",
+    "SBIN",
+    "LT",
+    "ITC",
+    "BHARTI",
+    "AXISBANK",
+    "KOTAKBANK",
+    "MARUTI",
+    "SUNPHARMA",
+    "M&M",
+    "ULTRACEMCO",
+    "HCLTECH",
+    "WIPRO",
+    "TITAN",
+    "BAJFINANCE",
+    "NTPC",
+    "POWERGRID",
+    "ONGC",
+    "COALINDIA",
+    "ASIANPAINT",
+    "HINDUNILVR"
+]
 
-def fetch_bse_announcements():
-    """BSE se announcements fetch karta hai"""
 
-    url = "https://www.bseindia.com/corporates/ann.html"
+# ============================================================
+# HELPERS
+# ============================================================
 
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                      "AppleWebKit/537.36 (KHTML, like Gecko) "
-                      "Chrome/120.0.0.0 Safari/537.36",
-        "Accept-Language": "en-US,en;q=0.9",
-        "Referer": "https://www.bseindia.com/"
-    }
+def clean_text(text):
+    return re.sub(r"\s+", " ", text or "").strip()
 
-    print("\n" + "="*60)
-    print("   BSE PEAD EARNINGS AGENT - ANNOUNCEMENT TRACKER")
-    print("="*60)
-    print(f"   Checking last {DAYS_TO_CHECK} days of announcements...")
-    print("="*60 + "\n")
 
-    try:
-        print("🔄 Step 1: Connecting to BSE...")
-        response = requests.get(url, headers=headers, timeout=15)
-        response.raise_for_status()
-        print("✅ Connected to BSE Successfully!\n")
+def contains_any(text, keywords):
+    text = (text or "").lower()
+    return any(keyword.lower() in text for keyword in keywords)
 
-    except requests.exceptions.ConnectionError:
-        print("❌ Error: Internet connection failed. Please check your network.")
-        return
-    except requests.exceptions.Timeout:
-        print("❌ Error: BSE server timeout. Try again later.")
-        return
-    except requests.exceptions.HTTPError as e:
-        print(f"❌ HTTP Error: {e}")
-        return
 
-    # ─────────────────────────────────────────
-    # PARSE HTML
-    # ─────────────────────────────────────────
-    print("🔄 Step 2: Parsing BSE data...")
-    soup = BeautifulSoup(response.text, "html.parser")
+def is_focus_company(company):
+    company_upper = (company or "").upper()
+    return any(name in company_upper for name in FOCUS_COMPANIES)
 
-    cutoff_date = datetime.now() - timedelta(days=DAYS_TO_CHECK)
 
-    priority_results = []    # Results (Main Focus)
-    secondary_results = []   # Other Announcements
+def parse_date_from_cell(text):
+    """
+    Table cell se announcement date parse karta hai.
+    Common formats handle karta hai.
+    """
+    text = clean_text(text)
 
-    rows = soup.find_all("tr")
+    candidates = []
 
-    for row in rows:
-        cols = row.find_all("td")
-        if len(cols) < 3:
-            continue
+    numeric_matches = re.findall(r"\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b", text)
+    candidates.extend(numeric_matches)
 
-        try:
-            date_text = cols[0].get_text(strip=True)
-            company   = cols[1].get_text(strip=True)
-            subject   = cols[2].get_text(strip=True)
+    text_matches = re.findall(
+        r"\b\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}\b",
+        text
+    )
+    candidates.extend(text_matches)
 
-            # Date filter
+    month_first_matches = re.findall(
+        r"\b[A-Za-z]{3,9}\s+\d{1,2},\s+\d{4}\b",
+        text
+    )
+    candidates.extend(month_first_matches)
+
+    formats = [
+        "%d/%m/%Y",
+        "%d-%m-%Y",
+        "%d/%m/%y",
+        "%d-%m-%y",
+        "%d %b %Y",
+        "%d %B %Y",
+        "%b %d, %Y",
+        "%B %d, %Y",
+    ]
+
+    for candidate in candidates:
+        for fmt in formats:
             try:
-                ann_date = datetime.strptime(date_text, "%d-%m-%Y")
+                return datetime.strptime(candidate, fmt).date()
             except ValueError:
+                continue
+
+    return None
+
+
+def extract_future_dates_from_subject(subject):
+    """
+    Subject ke andar future meeting/result date nikalne ki koshish karta hai.
+    Example:
+    - 12/06/2026
+    - 12-06-2026
+    - 12 June 2026
+    - June 12, 2026
+    """
+    subject = clean_text(subject)
+    found_dates = []
+
+    patterns = [
+        r"\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b",
+        r"\b\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}\b",
+        r"\b[A-Za-z]{3,9}\s+\d{1,2},\s+\d{4}\b",
+    ]
+
+    formats = [
+        "%d/%m/%Y",
+        "%d-%m-%Y",
+        "%d/%m/%y",
+        "%d-%m-%y",
+        "%d %b %Y",
+        "%d %B %Y",
+        "%b %d, %Y",
+        "%B %d, %Y",
+    ]
+
+    for pattern in patterns:
+        matches = re.findall(pattern, subject)
+        for match in matches:
+            for fmt in formats:
                 try:
-                    ann_date = datetime.strptime(date_text, "%d/%m/%Y")
+                    parsed = datetime.strptime(match, fmt).date()
+                    found_dates.append(parsed)
+                    break
                 except ValueError:
                     continue
 
-            if ann_date < cutoff_date:
-                continue
+    unique_dates = sorted(set(found_dates))
+    return unique_dates
 
-            # Keyword matching
-            matched_priority  = any(kw.lower() in subject.lower() for kw in PRIORITY_KEYWORDS)
-            matched_secondary = any(kw.lower() in subject.lower() for kw in SECONDARY_KEYWORDS)
 
-            entry = {
-                "date"   : date_text,
-                "company": company,
-                "subject": subject
-            }
+def fetch_page(url):
+    response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
+    response.raise_for_status()
+    return response.text
 
-            if matched_priority:
-                priority_results.append(entry)
-            elif matched_secondary:
-                secondary_results.append(entry)
 
-        except Exception:
+def parse_announcement_rows(html):
+    """
+    BSE announcement page ke rows parse karta hai.
+    Generic parsing rakha gaya hai taaki minor HTML change me bhi kaam kar sake.
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    rows = []
+
+    for tr in soup.find_all("tr"):
+        tds = tr.find_all("td")
+        if len(tds) < 3:
             continue
 
-    # ─────────────────────────────────────────
-    # DISPLAY RESULTS
-    # ─────────────────────────────────────────
-    print(f"✅ Parsing complete!\n")
+        cells = [clean_text(td.get_text(" ", strip=True)) for td in tds]
+        if not cells:
+            continue
 
-    # ── Priority: Results ──
-    print("="*60)
-    print(f"  ⭐ FINANCIAL RESULTS (Main Focus) — {len(priority_results)} Found")
-    print("="*60)
+        ann_date = parse_date_from_cell(cells[0])
+        if not ann_date:
+            continue
 
-    if priority_results:
-        for i, ann in enumerate(priority_results, 1):
-            print(f"\n  [{i}] 📅 Date    : {ann['date']}")
-            print(f"       🏢 Company : {ann['company']}")
-            print(f"       📋 Subject : {ann['subject']}")
+        company = cells[1] if len(cells) > 1 else ""
+        subject = " | ".join(cells[2:]) if len(cells) > 2 else ""
+
+        company = clean_text(company)
+        subject = clean_text(subject)
+
+        if not company or not subject:
+            continue
+
+        rows.append({
+            "announcement_date": ann_date,
+            "company": company,
+            "subject": subject
+        })
+
+    return rows
+
+
+def dedupe_items(items, keys):
+    seen = set()
+    unique = []
+
+    for item in items:
+        marker = tuple(item.get(k) for k in keys)
+        if marker in seen:
+            continue
+        seen.add(marker)
+        unique.append(item)
+
+    return unique
+
+
+def classify_announcements(rows):
+    today = datetime.now().date()
+    recent_cutoff = today - timedelta(days=PAST_DAYS)
+    notice_cutoff = today - timedelta(days=LOOKBACK_NOTICE_DAYS)
+    future_limit = today + timedelta(days=FUTURE_DAYS)
+
+    recent_results = []
+    recent_others = []
+    upcoming_result_meetings = []
+    todays_pead_alerts = []
+
+    for row in rows:
+        ann_date = row["announcement_date"]
+        company = row["company"]
+        subject = row["subject"]
+
+        subject_lower = subject.lower()
+
+        is_result = contains_any(subject_lower, RESULT_KEYWORDS)
+        is_secondary = contains_any(subject_lower, SECONDARY_KEYWORDS)
+        is_meeting = contains_any(subject_lower, MEETING_KEYWORDS)
+
+        # --------------------------------------------------------
+        # 1) Recent result announcements
+        # --------------------------------------------------------
+        if recent_cutoff <= ann_date <= today and is_result:
+            recent_results.append({
+                "announcement_date": ann_date,
+                "company": company,
+                "subject": subject,
+                "focus": is_focus_company(company)
+            })
+
+            if ann_date == today:
+                todays_pead_alerts.append({
+                    "type": "RESULT ANNOUNCED TODAY",
+                    "company": company,
+                    "date": ann_date,
+                    "subject": subject,
+                    "focus": is_focus_company(company)
+                })
+
+        # --------------------------------------------------------
+        # 2) Recent other announcements
+        # --------------------------------------------------------
+        if recent_cutoff <= ann_date <= today and (is_secondary and not is_result):
+            recent_others.append({
+                "announcement_date": ann_date,
+                "company": company,
+                "subject": subject,
+                "focus": is_focus_company(company)
+            })
+
+        # --------------------------------------------------------
+        # 3) Upcoming result-related board meeting notices
+        #    Notice may be filed today, but meeting date future me hoti hai
+        # --------------------------------------------------------
+        if notice_cutoff <= ann_date <= today and is_meeting and is_result:
+            candidate_dates = extract_future_dates_from_subject(subject)
+
+            for meeting_date in candidate_dates:
+                if today <= meeting_date <= future_limit:
+                    item = {
+                        "notice_date": ann_date,
+                        "meeting_date": meeting_date,
+                        "company": company,
+                        "subject": subject,
+                        "focus": is_focus_company(company)
+                    }
+                    upcoming_result_meetings.append(item)
+
+                    if meeting_date == today:
+                        todays_pead_alerts.append({
+                            "type": "MEETING / RESULT DAY TODAY",
+                            "company": company,
+                            "date": meeting_date,
+                            "subject": subject,
+                            "focus": is_focus_company(company)
+                        })
+
+    recent_results = dedupe_items(
+        recent_results,
+        ["announcement_date", "company", "subject"]
+    )
+
+    recent_others = dedupe_items(
+        recent_others,
+        ["announcement_date", "company", "subject"]
+    )
+
+    upcoming_result_meetings = dedupe_items(
+        upcoming_result_meetings,
+        ["meeting_date", "company", "subject"]
+    )
+
+    todays_pead_alerts = dedupe_items(
+        todays_pead_alerts,
+        ["type", "date", "company", "subject"]
+    )
+
+    recent_results.sort(key=lambda x: (not x["focus"], -x["announcement_date"].toordinal(), x["company"]))
+    recent_others.sort(key=lambda x: (not x["focus"], -x["announcement_date"].toordinal(), x["company"]))
+    upcoming_result_meetings.sort(key=lambda x: (not x["focus"], x["meeting_date"].toordinal(), x["company"]))
+    todays_pead_alerts.sort(key=lambda x: (not x["focus"], x["date"].toordinal(), x["company"]))
+
+    return {
+        "recent_results": recent_results,
+        "recent_others": recent_others,
+        "upcoming_result_meetings": upcoming_result_meetings,
+        "todays_pead_alerts": todays_pead_alerts
+    }
+
+
+def print_section(title):
+    print("\n" + "=" * 90)
+    print(title)
+    print("=" * 90)
+
+
+def print_results(data):
+    today = datetime.now().date()
+
+    print("\n" + "=" * 90)
+    print("AI FIESTA | BSE RESULT + ANNOUNCEMENT + PEAD TRACKER")
+    print("=" * 90)
+    print(f"Run Time      : {datetime.now().strftime('%d-%m-%Y %H:%M:%S')}")
+    print(f"Recent Window : Last {PAST_DAYS} days")
+    print(f"Future Window : Next {FUTURE_DAYS} days")
+    print("=" * 90)
+
+    # --------------------------------------------------------
+    # TODAY ALERTS
+    # --------------------------------------------------------
+    print_section("TODAY'S PEAD ALERTS")
+    if data["todays_pead_alerts"]:
+        for idx, item in enumerate(data["todays_pead_alerts"], start=1):
+            tag = "IMPORTANT" if item["focus"] else "NORMAL"
+            print(f"{idx}. [{tag}] {item['type']}")
+            print(f"   Company : {item['company']}")
+            print(f"   Date    : {item['date'].strftime('%d-%m-%Y')}")
+            print(f"   Subject : {item['subject']}")
+            print("-" * 90)
     else:
-        print("  ⚠️  No Financial Results found in last 7 days.")
+        print("No PEAD alert for today.")
 
-    # ── Secondary: Other Announcements ──
-    print("\n" + "="*60)
-    print(f"  📢 OTHER KEY ANNOUNCEMENTS — {len(secondary_results)} Found")
-    print("="*60)
-
-    if secondary_results:
-        for i, ann in enumerate(secondary_results, 1):
-            print(f"\n  [{i}] 📅 Date    : {ann['date']}")
-            print(f"       🏢 Company : {ann['company']}")
-            print(f"       📋 Subject : {ann['subject']}")
+    # --------------------------------------------------------
+    # UPCOMING IMPORTANT RESULT MEETINGS
+    # --------------------------------------------------------
+    print_section(f"UPCOMING RESULT-RELATED MEETINGS / INTIMATIONS | NEXT {FUTURE_DAYS} DAYS")
+    if data["upcoming_result_meetings"]:
+        for idx, item in enumerate(data["upcoming_result_meetings"], start=1):
+            days_left = (item["meeting_date"] - today).days
+            tag = "IMPORTANT" if item["focus"] else "NORMAL"
+            print(f"{idx}. [{tag}] {item['company']}")
+            print(f"   Meeting Date : {item['meeting_date'].strftime('%d-%m-%Y')}  |  Days Left: {days_left}")
+            print(f"   Notice Date  : {item['notice_date'].strftime('%d-%m-%Y')}")
+            print(f"   Subject      : {item['subject']}")
+            print("-" * 90)
     else:
-        print("  ⚠️  No other key announcements found in last 7 days.")
+        print("No upcoming result-related meeting notices found.")
 
-    # ── Summary ──
-    total = len(priority_results) + len(secondary_results)
-    print("\n" + "="*60)
-    print(f"  ✅ SUMMARY")
-    print("="*60)
-    print(f"  • Financial Results  : {len(priority_results)}")
-    print(f"  • Other Announcements: {len(secondary_results)}")
-    print(f"  • Total Found        : {total}")
-    print("="*60 + "\n")
+    # --------------------------------------------------------
+    # RECENT RESULTS
+    # --------------------------------------------------------
+    print_section(f"RECENT RESULT ANNOUNCEMENTS | LAST {PAST_DAYS} DAYS")
+    if data["recent_results"]:
+        for idx, item in enumerate(data["recent_results"], start=1):
+            tag = "IMPORTANT" if item["focus"] else "NORMAL"
+            print(f"{idx}. [{tag}] {item['company']}")
+            print(f"   Announcement Date : {item['announcement_date'].strftime('%d-%m-%Y')}")
+            print(f"   Subject           : {item['subject']}")
+            print("-" * 90)
+    else:
+        print("No result announcements found in recent window.")
+
+    # --------------------------------------------------------
+    # OTHER ANNOUNCEMENTS
+    # --------------------------------------------------------
+    print_section(f"OTHER IMPORTANT ANNOUNCEMENTS | LAST {PAST_DAYS} DAYS")
+    if data["recent_others"]:
+        for idx, item in enumerate(data["recent_others"], start=1):
+            tag = "IMPORTANT" if item["focus"] else "NORMAL"
+            print(f"{idx}. [{tag}] {item['company']}")
+            print(f"   Announcement Date : {item['announcement_date'].strftime('%d-%m-%Y')}")
+            print(f"   Subject           : {item['subject']}")
+            print("-" * 90)
+    else:
+        print("No other important announcements found in recent window.")
+
+    # --------------------------------------------------------
+    # SUMMARY
+    # --------------------------------------------------------
+    print_section("SUMMARY")
+    print(f"Today's PEAD Alerts               : {len(data['todays_pead_alerts'])}")
+    print(f"Upcoming Result Meetings Notices  : {len(data['upcoming_result_meetings'])}")
+    print(f"Recent Result Announcements       : {len(data['recent_results'])}")
+    print(f"Recent Other Announcements        : {len(data['recent_others'])}")
+    print("=" * 90)
 
 
-# ─────────────────────────────────────────────
-# MAIN
-# ─────────────────────────────────────────────
+def main():
+    try:
+        print("Connecting to BSE...")
+        html = fetch_page(BSE_ANNOUNCEMENTS_URL)
+
+        print("Parsing announcement rows...")
+        rows = parse_announcement_rows(html)
+
+        print(f"Rows parsed: {len(rows)}")
+
+        print("Classifying results, meetings, PEAD alerts...")
+        data = classify_announcements(rows)
+
+        print_results(data)
+
+    except requests.exceptions.HTTPError as exc:
+        print(f"HTTP Error: {exc}")
+    except requests.exceptions.ConnectionError:
+        print("Connection Error: Internet ya BSE website access issue.")
+    except requests.exceptions.Timeout:
+        print("Timeout Error: BSE response slow hai, thodi der baad try karo.")
+    except Exception as exc:
+        print(f"Unexpected Error: {exc}")
+
+
 if __name__ == "__main__":
-    fetch_bse_announcements()
+    main()
