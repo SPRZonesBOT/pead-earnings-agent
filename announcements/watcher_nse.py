@@ -1,13 +1,11 @@
 import requests
 from datetime import datetime, timedelta
 import logging
-import json
 from tenacity import retry, stop_after_attempt, wait_fixed
 
-# Logger setup
 logger = logging.getLogger(__name__)
 
-# NSE API URL (Updated - official API endpoint)
+NSE_HOME_URL = "https://www.nseindia.com"
 NSE_API_URL = "https://www.nseindia.com/api/corporate-announcements"
 
 HEADERS = {
@@ -15,114 +13,61 @@ HEADERS = {
     "Accept": "application/json, text/plain, */*",
     "Accept-Language": "en-US,en;q=0.9",
     "Referer": "https://www.nseindia.com/",
-    "Origin": "https://www.nseindia.com",
     "Connection": "keep-alive",
+    "Origin": "https://www.nseindia.com",
 }
 
 TIMEOUT = 30
-SESSION_COOKIES = {}
 
 
 def get_nse_session():
-    """
-    Establish a session with NSE by visiting homepage first (required for cookies).
-    """
-    global SESSION_COOKIES
     session = requests.Session()
     session.headers.update(HEADERS)
 
     try:
-        # Step 1: Visit homepage to get cookies
-        home_resp = session.get(
-            "https://www.nseindia.com",
-            timeout=TIMEOUT
-        )
-        home_resp.raise_for_status()
-
-        # Store cookies
-        SESSION_COOKIES = session.cookies.get_dict()
-        logger.info("NSE session established successfully")
-        return session
+        resp = session.get(NSE_HOME_URL, timeout=TIMEOUT)
+        resp.raise_for_status()
+        logger.info("NSE session established")
     except Exception as e:
-        logger.warning(f"NSE session init failed (will try without session): {e}")
-        return session
+        logger.warning(f"NSE session init failed: {e}")
+
+    return session
 
 
 @retry(stop=stop_after_attempt(3), wait=wait_fixed(5))
 def fetch_nse_announcements():
-    """
-    Fetch corporate announcements from NSE API.
-    Retries up to 3 times with 5 sec gap if failed.
-    """
-    try:
-        # Establish session first
-        session = get_nse_session()
-
-        # Set date range (last 2 days)
-        today = datetime.now()
-        two_days_ago = today - timedelta(days=2)
-
-        params = {
-            "index": "equities",
-            "from_date": two_days_ago.strftime("%d-%m-%Y"),
-            "to_date": today.strftime("%d-%m-%Y"),
-        }
-
-        response = session.get(
-            NSE_API_URL,
-            params=params,
-            headers=HEADERS,
-            timeout=TIMEOUT
-        )
-        response.raise_for_status()
-        return response.json()
-
-    except requests.exceptions.HTTPError as e:
-        if response.status_code == 404:
-            logger.error(f"NSE API URL not found: {NSE_API_URL}")
-            # Fallback to alternative endpoint
-            return fetch_nse_announcements_fallback()
-        logger.error(f"NSE HTTP error: {e}")
-        raise
-    except Exception as e:
-        logger.error(f"NSE fetch failed: {e}")
-        raise
-
-
-@retry(stop=stop_after_attempt(2), wait=wait_fixed(5))
-def fetch_nse_announcements_fallback():
-    """
-    Fallback: Try alternative NSE endpoint if primary fails.
-    """
-    fallback_url = "https://www.nseindia.com/api/corp-info"
-
     session = get_nse_session()
+
     today = datetime.now()
-    two_days_ago = today - timedelta(days=2)
+    from_date = (today - timedelta(days=2)).strftime("%d-%m-%Y")
+    to_date = today.strftime("%d-%m-%Y")
 
     params = {
-        "from_date": two_days_ago.strftime("%d-%m-%Y"),
-        "to_date": today.strftime("%d-%m-%Y"),
+        "index": "equities",
+        "from_date": from_date,
+        "to_date": to_date,
     }
 
+    response = session.get(
+        NSE_API_URL,
+        params=params,
+        timeout=TIMEOUT
+    )
+
+    if response.status_code == 403:
+        logger.error("NSE returned 403 Forbidden")
+        return []
+
+    response.raise_for_status()
+
     try:
-        response = session.get(
-            fallback_url,
-            params=params,
-            headers=HEADERS,
-            timeout=TIMEOUT
-        )
-        response.raise_for_status()
         return response.json()
     except Exception as e:
-        logger.error(f"NSE fallback also failed: {e}")
-        raise
+        logger.error(f"NSE JSON parse failed: {e}")
+        return []
 
 
 def parse_nse_announcements(api_response):
-    """
-    Parse NSE API JSON response and extract announcements.
-    """
     announcements = []
     today = datetime.now().date()
     yesterday = today - timedelta(days=1)
@@ -130,36 +75,67 @@ def parse_nse_announcements(api_response):
     if not api_response:
         return announcements
 
-    # NSE API returns data in different structures
-    data = api_response.get("data", api_response.get("announcements", api_response.get("items", [])))
+    # NSE can return either list or dict
+    if isinstance(api_response, list):
+        data = api_response
+    elif isinstance(api_response, dict):
+        data = (
+            api_response.get("data")
+            or api_response.get("announcements")
+            or api_response.get("items")
+            or []
+        )
+    else:
+        return announcements
 
     if isinstance(data, dict):
         data = [data]
 
     for item in data:
         try:
-            if isinstance(item, str):
+            if not isinstance(item, dict):
                 continue
 
-            # Extract fields (handle multiple possible key names)
-            date_str = item.get("date", item.get("anndate", item.get("ann_dt", "")))
-            company = item.get("symbol", item.get("compName", item.get("company", item.get("sm", ""))))
-            subject = item.get("subject", item.get("desc", item.get("description", item.get("head", ""))))
+            date_str = (
+                item.get("date")
+                or item.get("anndate")
+                or item.get("ann_dt")
+                or item.get("announcementDate")
+                or ""
+            )
+
+            company = (
+                item.get("symbol")
+                or item.get("compName")
+                or item.get("company")
+                or item.get("sm")
+                or item.get("companyName")
+                or ""
+            )
+
+            subject = (
+                item.get("subject")
+                or item.get("desc")
+                or item.get("description")
+                or item.get("head")
+                or item.get("title")
+                or ""
+            )
 
             if not date_str or not company:
                 continue
 
-            # Parse date
-            for fmt in ["%d-%m-%Y", "%Y-%m-%d", "%d-%b-%Y", "%d/%m/%Y"]:
+            ann_date = None
+            for fmt in ["%d-%m-%Y", "%Y-%m-%d", "%d-%b-%Y", "%d/%m/%Y", "%d-%m-%Y %H:%M:%S"]:
                 try:
                     ann_date = datetime.strptime(date_str, fmt).date()
                     break
                 except ValueError:
                     continue
-            else:
-                continue  # Skip if no date format matched
 
-            # Only keep today's or yesterday's announcements
+            if not ann_date:
+                continue
+
             if ann_date in [today, yesterday]:
                 announcements.append({
                     "date": str(ann_date),
@@ -169,32 +145,23 @@ def parse_nse_announcements(api_response):
                 })
 
         except Exception as e:
-            logger.warning(f"NSE: Skipping item due to error: {e}")
-            continue
+            logger.warning(f"Skipping NSE item: {e}")
 
     logger.info(f"NSE: Fetched {len(announcements)} announcements")
     return announcements
 
 
 def get_nse_announcements():
-    """
-    Main function to get NSE announcements with error handling.
-    """
     try:
         api_response = fetch_nse_announcements()
-        announcements = parse_nse_announcements(api_response)
-        return announcements
+        return parse_nse_announcements(api_response)
     except Exception as e:
         logger.error(f"NSE announcements fetch failed after retries: {e}")
         return []
 
 
-# ----------------------------
-# For Direct Testing
-# ----------------------------
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    announcements = get_nse_announcements()
-    for ann in announcements:
-        print(f"{ann['date']} | {ann['company']} | {ann['subject']} | {ann['source']}")
-
+    data = get_nse_announcements()
+    for row in data:
+        print(f"{row['date']} | {row['company']} | {row['subject']} | {row['source']}")
