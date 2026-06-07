@@ -6,45 +6,28 @@ from datetime import datetime
 from announcements.watcher_nse import get_nse_announcements
 from announcements.watcher_bse import get_bse_announcements
 
-# Force UTF-8 on Windows terminal
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
-if hasattr(sys.stderr, "reconfigure"):
-    sys.stderr.reconfigure(encoding="utf-8")
 
-# Logging Setup
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+logger.propagate = False
 
-# Clear old handlers if re-running in some environments
-if logger.handlers:
-    logger.handlers.clear()
+if not logger.handlers:
+    file_handler = logging.FileHandler("watcher.log", encoding="utf-8")
+    console_handler = logging.StreamHandler(sys.stdout)
 
-file_handler = logging.FileHandler("watcher.log", encoding="utf-8")
-file_handler.setLevel(logging.INFO)
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    file_handler.setFormatter(formatter)
+    console_handler.setFormatter(formatter)
 
-console_handler = logging.StreamHandler(sys.stdout)
-console_handler.setLevel(logging.INFO)
-
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-file_handler.setFormatter(formatter)
-console_handler.setFormatter(formatter)
-
-logger.addHandler(file_handler)
-logger.addHandler(console_handler)
-
-# Also configure root logger for imported modules
-root_logger = logging.getLogger()
-root_logger.setLevel(logging.INFO)
-if root_logger.handlers:
-    root_logger.handlers.clear()
-root_logger.addHandler(file_handler)
-root_logger.addHandler(console_handler)
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
 
 
 def run_watcher():
     print("\n" + "=" * 80)
-    print(f"PEAD EARNINGS AGENT - ANNOUNCEMENT WATCHER MODULE 1")
+    print("PEAD EARNINGS AGENT - ANNOUNCEMENT WATCHER MODULE 1")
     print("=" * 80)
     print(f"Started at: {datetime.now()}")
     print("Logs: watcher.log")
