@@ -20,6 +20,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 # ─────────────────────────────────────────────────────────────
 # Imports
 # ─────────────────────────────────────────────────────────────
@@ -49,23 +50,26 @@ except ImportError:
 # Configuration
 # ─────────────────────────────────────────────────────────────
 
-# 🔧 Telegram Config — Set your credentials here
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
 TELEGRAM_CHAT_ID   = os.getenv("TELEGRAM_CHAT_ID", "YOUR_CHAT_ID_HERE")
 
-# 🎯 Alert filters
-TELEGRAM_SEND_STRONG_CONFIRMED  = True   # 🔥 Strong Confirmed → always send
-TELEGRAM_SEND_MODERATE_CONFIRMED = False # ✅ Moderate Confirmed → optional
-TELEGRAM_SEND_WATCHLIST         = False  # 👀 Watchlist → no
+TELEGRAM_SEND_STRONG_CONFIRMED   = True
+TELEGRAM_SEND_MODERATE_CONFIRMED = False
+TELEGRAM_SEND_WATCHLIST          = False
 
-# 📊 Display config
 SHOW_ALL_ANNOUNCEMENTS = True
 SHOW_SUBSCORES         = True
 
 
 # ─────────────────────────────────────────────────────────────
-# Display Helpers
+# Helpers
 # ─────────────────────────────────────────────────────────────
+
+def clamp(value, low=0, high=100):
+    if not isinstance(value, (int, float)):
+        return 0
+    return max(low, min(high, int(value)))
+
 
 def print_separator(char="=", width=90):
     print(char * width)
@@ -77,19 +81,21 @@ def print_header(title: str, width=90):
     print_separator("=", width)
 
 
-def print_summary(data: list):
-    """Print aggregate summary of analysis."""
-    total       = len(data)
-    bullish     = [d for d in data if "BULLISH" in d.get("signal", "")]
-    bearish     = [d for d in data if "BEARISH" in d.get("signal", "")]
-    neutral     = [d for d in data if "NEUTRAL" in d.get("signal", "")]
-    high_imp    = [d for d in data if d.get("impact") == "HIGH"]
-    medium_imp  = [d for d in data if d.get("impact") == "MEDIUM"]
+# ─────────────────────────────────────────────────────────────
+# Summary Printer
+# ─────────────────────────────────────────────────────────────
 
-    strong_c    = [d for d in data if d.get("confirmation_tier") == "🔥 STRONG CONFIRMED"]
-    moderate_c  = [d for d in data if d.get("confirmation_tier") == "✅ MODERATELY CONFIRMED"]
-    watchlist   = [d for d in data if d.get("confirmation_tier") == "👀 WATCHLIST"]
-    no_action   = [d for d in data if d.get("confirmation_tier") == "⛔ NO ACTION"]
+def print_summary(data: list):
+    total      = len(data)
+    bullish    = [d for d in data if "BULLISH" in d.get("signal", "")]
+    bearish    = [d for d in data if "BEARISH" in d.get("signal", "")]
+    neutral    = [d for d in data if "NEUTRAL" in d.get("signal", "")]
+    high_imp   = [d for d in data if d.get("impact") == "HIGH"]
+    medium_imp = [d for d in data if d.get("impact") == "MEDIUM"]
+    strong_c   = [d for d in data if d.get("confirmation_tier") == "🔥 STRONG CONFIRMED"]
+    moderate_c = [d for d in data if d.get("confirmation_tier") == "✅ MODERATELY CONFIRMED"]
+    watchlist  = [d for d in data if d.get("confirmation_tier") == "👀 WATCHLIST"]
+    no_action  = [d for d in data if d.get("confirmation_tier") == "⛔ NO ACTION"]
 
     telegram_bound = strong_c + (moderate_c if TELEGRAM_SEND_MODERATE_CONFIRMED else [])
 
@@ -111,31 +117,31 @@ def print_summary(data: list):
     print_separator("-", 56)
 
 
+# ─────────────────────────────────────────────────────────────
+# Announcement Detail Printer
+# ─────────────────────────────────────────────────────────────
+
 def print_announcement_detail(ann: dict, idx: int):
-    """Print a single announcement with full analysis details."""
-    signal       = ann.get("signal", "⚪ NEUTRAL")
-    impact       = ann.get("impact", "LOW")
-    company      = ann.get("company", "N/A")
-    symbol       = ann.get("symbol", "N/A")
-    subject      = ann.get("subject", "N/A")
-    date         = ann.get("date", "N/A")
-    source       = ann.get("source", "NSE")
+    signal        = ann.get("signal", "⚪ NEUTRAL")
+    impact        = ann.get("impact", "LOW")
+    company       = ann.get("company", "N/A")
+    symbol        = ann.get("symbol", "N/A")
+    subject       = ann.get("subject", "N/A")
+    date          = ann.get("date", "N/A")
 
-    live_price   = ann.get("live_price", {}) or {}
-    pead_signal  = ann.get("pead_signal", "⚪ N/A")
-    drift_score  = ann.get("drift_score", {})
+    live_price    = ann.get("live_price", {}) or {}
+    pead_signal   = ann.get("pead_signal", "⚪ N/A")
+    drift_score   = ann.get("drift_score", {}) or {}
 
-    confirm_tier = ann.get("confirmation_tier", "⛔ NO ACTION")
+    confirm_tier  = ann.get("confirmation_tier", "⛔ NO ACTION")
     confirm_score = ann.get("confirmation_score", 0)
-    confirmation = ann.get("confirmation", {}) or {}
-    sub_scores   = confirmation.get("sub_scores", {})
+    confirmation  = ann.get("confirmation", {}) or {}
+    sub_scores    = confirmation.get("sub_scores", {}) or {}
 
-    # Impact badge
     impact_colors = {"HIGH": "🔥 HIGH", "MEDIUM": "🟡 MEDIUM", "LOW": "🟢 LOW"}
-    impact_badge = impact_colors.get(impact, "⚪ UNKNOWN")
+    impact_badge  = impact_colors.get(impact, "⚪ UNKNOWN")
 
-    # PEAD confidence
-    pead_conf = drift_score.get("confidence", "LOW")
+    pead_conf      = drift_score.get("confidence", "LOW")
     pead_conf_icon = {"HIGH": "🔥", "MEDIUM": "🟡", "LOW": "⚪"}.get(pead_conf, "⚪")
 
     print(f"\n{'─' * 90}")
@@ -149,11 +155,11 @@ def print_announcement_detail(ann: dict, idx: int):
     print(f"  🔤 Symbol  : {symbol}")
     print(f"  📝 Subject : {subject[:120]}")
 
-    # Live Price Block
+    # ── Live Price Block ─────────────────────────────────────
     if live_price.get("price") is not None:
-        price  = live_price["price"]
-        change = live_price["change_pct"]
-        trend  = live_price["trend"]
+        price  = live_price.get("price", 0)
+        change = live_price.get("change_pct", 0)
+        trend  = live_price.get("trend", "N/A")
         volume = live_price.get("volume", 0)
         avol   = live_price.get("avg_volume_20d", 0)
         vsurge = live_price.get("volume_surge_pct", 0)
@@ -168,7 +174,7 @@ def print_announcement_detail(ann: dict, idx: int):
     else:
         print(f"\n  💹 Live Price : ❌ Not Available")
 
-    # PEAD Detail
+    # ── PEAD Detail ──────────────────────────────────────────
     if drift_score:
         print(f"\n  🧠 PEAD DETAIL")
         print(f"     Drift Score     : {drift_score.get('raw_score', 'N/A')}")
@@ -176,55 +182,123 @@ def print_announcement_detail(ann: dict, idx: int):
         print(f"     Sentiment Score : {drift_score.get('sentiment_score', 'N/A')}")
         print(f"     Price Change %  : {drift_score.get('price_change_pct', 0):+.2f}%")
 
-    # Sub-Scores Block
+    # ── Sub-Scores Block ─────────────────────────────────────
     if sub_scores and SHOW_SUBSCORES:
         print(f"\n  📌 CONFIRMATION SUB-SCORES")
-        for key, label in [
-            ("sentiment", "Sentiment"),
-            ("price_action", "Price Action"),
-            ("volume", "Volume"),
-            ("market", "Market Context"),
-            ("fundamentals", "Fundamentals"),
-            ("news_quality", "News Quality"),
-        ]:
-            ss = sub_scores.get(key, {})
-            s_val = ss.get("score", "N/A")
+        score_keys = [
+            ("sentiment",   "Sentiment"),
+            ("price_action","Price Action"),
+            ("volume",      "Volume"),
+            ("market",      "Market Context"),
+            ("fundamentals","Fundamentals"),
+            ("news_quality","News Quality"),
+        ]
+        for key, label in score_keys:
+            ss     = sub_scores.get(key, {}) or {}
+            s_val  = ss.get("score", "N/A")
             s_note = ss.get("note", "")
-            bar = "█" * int(clamp(s_val, 0, 100) // 5) if isinstance(s_val, (int, float)) else ""
+            bar    = "█" * (clamp(s_val, 0, 100) // 5) if isinstance(s_val, (int, float)) else ""
             print(f"     {label:15s} : {str(s_val):>3s}/100  {bar}")
             if s_note:
                 print(f"                   ({s_note[:80]})")
 
-    # PDF link
+    # ── Reasons / Penalties ──────────────────────────────────
+    reasons = confirmation.get("reasons", [])
+    if reasons:
+        print(f"\n  📋 REASONS")
+        for r in reasons:
+            print(f"     • {r}")
+
+    # ── PDF Link ─────────────────────────────────────────────
     pdf_url = ann.get("pdf_url", "")
     if pdf_url:
         print(f"\n  📄 PDF : {pdf_url}")
 
-    # Matched keywords
+    # ── Matched Keywords ─────────────────────────────────────
     keywords = ann.get("matched_keywords", [])
     if keywords:
-        print(f"\n  🔑 Keywords: {', '.join(keywords[:8])}")
+        kw_display = ", ".join(keywords[:8])
+        print(f"\n  🔑 Keywords : {kw_display}")
         if len(keywords) > 8:
             print(f"               ... and {len(keywords) - 8} more")
 
 
-def clamp(value, low=0, high=100):
-    if not isinstance(value, (int, float)):
-        return 0
-    return max(low, min(high, int(value)))
+# ─────────────────────────────────────────────────────────────
+# Confirmed Picks Printer
+# ─────────────────────────────────────────────────────────────
+
+def print_confirmed_picks(data: list):
+    strong   = sorted(
+        [d for d in data if d.get("confirmation_tier") == "🔥 STRONG CONFIRMED"],
+        key=lambda x: x.get("confirmation_score", 0), reverse=True
+    )
+    moderate = sorted(
+        [d for d in data if d.get("confirmation_tier") == "✅ MODERATELY CONFIRMED"],
+        key=lambda x: x.get("confirmation_score", 0), reverse=True
+    )
+    watch    = sorted(
+        [d for d in data if d.get("confirmation_tier") == "👀 WATCHLIST"],
+        key=lambda x: x.get("confirmation_score", 0), reverse=True
+    )
+
+    def print_tier_table(picks, heading):
+        if not picks:
+            return
+        print(f"\n{heading} ({len(picks)})")
+        print_separator("-", 90)
+        print(f"  {'Symbol':<12s}  {'Price':>10s}  {'Change':>8s}  {'Score':>6s}  {'Signal':<25s}")
+        print_separator("-", 90)
+        for ann in picks:
+            pd_    = ann.get("live_price", {}) or {}
+            price  = pd_.get("price", 0) or 0
+            change = pd_.get("change_pct", 0) or 0
+            signal = ann.get("signal", "N/A")
+            score  = ann.get("confirmation_score", 0)
+            print(
+                f"  {ann.get('symbol','N/A'):<12s}  "
+                f"₹{price:>8.2f}  "
+                f"{change:>+7.2f}%  "
+                f"{score:>5.1f}  "
+                f"{signal:<25s}"
+            )
+        print()
+
+    print_tier_table(strong,   "🔥 STRONG CONFIRMED PICKS")
+    print_tier_table(moderate, "✅ MODERATELY CONFIRMED PICKS")
+
+    # Watchlist — top 10 only
+    if watch:
+        print(f"\n👀 WATCHLIST TOP 10")
+        print_separator("-", 90)
+        print(f"  {'Symbol':<12s}  {'Price':>10s}  {'Change':>8s}  {'Score':>6s}  {'Signal':<25s}")
+        print_separator("-", 90)
+        for ann in watch[:10]:
+            pd_    = ann.get("live_price", {}) or {}
+            price  = pd_.get("price", 0) or 0
+            change = pd_.get("change_pct", 0) or 0
+            signal = ann.get("signal", "N/A")
+            score  = ann.get("confirmation_score", 0)
+            print(
+                f"  {ann.get('symbol','N/A'):<12s}  "
+                f"₹{price:>8.2f}  "
+                f"{change:>+7.2f}%  "
+                f"{score:>5.1f}  "
+                f"{signal:<25s}"
+            )
+        if len(watch) > 10:
+            print(f"  ... and {len(watch) - 10} more")
+        print()
 
 
 # ─────────────────────────────────────────────────────────────
-# Telegram Alert Integration
+# Telegram Alert Sender
 # ─────────────────────────────────────────────────────────────
 
 def send_telegram_alerts(telegram, analyzed_data: list):
-    """Send alerts based on confirmation tier filters."""
-    if not telegram or not telegram.enabled:
+    if not telegram or not getattr(telegram, "enabled", False):
         logger.info("ℹ️  Telegram disabled — skipping alerts.")
         return
 
-    # Determine which picks qualify for Telegram
     telegram_picks = []
     for ann in analyzed_data:
         tier = ann.get("confirmation_tier", "")
@@ -235,94 +309,36 @@ def send_telegram_alerts(telegram, analyzed_data: list):
 
     if not telegram_picks:
         logger.info("ℹ️  No Telegram-bound picks found.")
-        # Still send summary
-        telegram.send_daily_summary(analyzed_data)
+        try:
+            telegram.send_daily_summary(analyzed_data)
+            print("  📊 Daily summary sent!")
+        except Exception as e:
+            logger.warning(f"Daily summary send failed: {e}")
         return
 
-    # Send individual alerts
     sent_count = 0
     for pick in telegram_picks:
-        success = telegram.send_pead_alert(pick)
-        if success:
-            sent_count += 1
-            print(f"  📱 Alert sent: {pick['symbol']} — {pick['confirmation_tier']} ({pick['confirmation_score']}/100)")
-        else:
-            print(f"  ❌ Alert failed: {pick['symbol']}")
+        try:
+            success = telegram.send_pead_alert(pick)
+            if success:
+                sent_count += 1
+                print(
+                    f"  📱 Alert sent   : {pick.get('symbol','?')} — "
+                    f"{pick.get('confirmation_tier','?')} "
+                    f"({pick.get('confirmation_score', 0)}/100)"
+                )
+            else:
+                print(f"  ❌ Alert failed : {pick.get('symbol','?')}")
+        except Exception as e:
+            logger.warning(f"Alert send error for {pick.get('symbol','?')}: {e}")
 
-    # Send end-of-day summary
-    telegram.send_daily_summary(analyzed_data)
-    print(f"  📊 Daily summary sent!")
+    try:
+        telegram.send_daily_summary(analyzed_data)
+        print("  📊 Daily summary sent!")
+    except Exception as e:
+        logger.warning(f"Daily summary send failed: {e}")
 
     logger.info(f"✅ Telegram: {sent_count}/{len(telegram_picks)} alerts sent.")
-
-
-# ─────────────────────────────────────────────────────────────
-# Confirmed Picks Display
-# ─────────────────────────────────────────────────────────────
-
-def print_confirmed_picks(data: list):
-    """Display top confirmed picks grouped by tier."""
-    strong   = [d for d in data if d.get("confirmation_tier") == "🔥 STRONG CONFIRMED"]
-    moderate = [d for d in data if d.get("confirmation_tier") == "✅ MODERATELY CONFIRMED"]
-    watch    = [d for d in data if d.get("confirmation_tier") == "👀 WATCHLIST"]
-
-    # Sort each by confirmation score descending
-    strong.sort(key=lambda x: x.get("confirmation_score", 0), reverse=True)
-    moderate.sort(key=lambda x: x.get("confirmation_score", 0), reverse=True)
-    watch.sort(key=lambda x: x.get("confirmation_score", 0), reverse=True)
-
-    if strong:
-        print(f"\n🔥 STRONG CONFIRMED PICKS ({len(strong)})")
-        print_separator("-", 90)
-        print(f"  {'Symbol':<12s}  {'Price':>10s}  {'Change':>8s}  {'Score':>6s}  {'Signal':<22s}")
-        print_separator("-", 90)
-        for ann in strong:
-            pd = ann.get("live_price", {}) or {}
-            price = pd.get("price", 0)
-            change = pd.get("change_pct", 0)
-            signal = ann.get("signal", "N/A")
-            print(
-                f"  {ann['symbol']:<12s}  ₹{price:>8.2f}  "
-                f"{change:>+7.2f}%  {ann['confirmation_score']:>5.1f}  "
-                f"{signal:<22s}"
-            )
-        print()
-
-    if moderate:
-        print(f"\n✅ MODERATELY CONFIRMED PICKS ({len(moderate)})")
-        print_separator("-", 90)
-        print(f"  {'Symbol':<12s}  {'Price':>10s}  {'Change':>8s}  {'Score':>6s}  {'Signal':<22s}")
-        print_separator("-", 90)
-        for ann in moderate:
-            pd = ann.get("live_price", {}) or {}
-            price = pd.get("price", 0)
-            change = pd.get("change_pct", 0)
-            signal = ann.get("signal", "N/A")
-            print(
-                f"  {ann['symbol']:<12s}  ₹{price:>8.2f}  "
-                f"{change:>+7.2f}%  {ann['confirmation_score']:>5.1f}  "
-                f"{signal:<22s}"
-            )
-        print()
-
-    if watch:
-        print(f"\n👀 WATCHLIST ({len(watch)})")
-        print_separator("-", 90)
-        print(f"  {'Symbol':<12s}  {'Price':>10s}  {'Change':>8s}  {'Score':>6s}  {'Signal':<22s}")
-        print_separator("-", 90)
-        for ann in watch[:10]:  # Top 10 only
-            pd = ann.get("live_price", {}) or {}
-            price = pd.get("price", 0)
-            change = pd.get("change_pct", 0)
-            signal = ann.get("signal", "N/A")
-            print(
-                f"  {ann['symbol']:<12s}  ₹{price:>8.2f}  "
-                f"{change:>+7.2f}%  {ann['confirmation_score']:>5.1f}  "
-                f"{signal:<22s}"
-            )
-        if len(watch) > 10:
-            print(f"  ... and {len(watch) - 10} more")
-        print()
 
 
 # ─────────────────────────────────────────────────────────────
@@ -343,21 +359,23 @@ def main():
     # ── Initialize Telegram ──────────────────────────────────
     telegram = None
     if TELEGRAM_AVAILABLE and TelegramAlert:
-        telegram = TelegramAlert(
-            bot_token=TELEGRAM_BOT_TOKEN,
-            chat_id=TELEGRAM_CHAT_ID,
-        )
-        if telegram.enabled:
-            print("✅ Telegram Bot: Connected & Ready 📱")
-        else:
-            print("⚠️  Telegram Bot: Not configured. Set TELEGRAM_BOT_TOKEN & TELEGRAM_CHAT_ID.")
-            print("   (Use environment variables or edit main.py directly)")
+        try:
+            telegram = TelegramAlert(
+                bot_token=TELEGRAM_BOT_TOKEN,
+                chat_id=TELEGRAM_CHAT_ID,
+            )
+            if getattr(telegram, "enabled", False):
+                print("✅ Telegram Bot: Connected & Ready 📱")
+            else:
+                print("⚠️  Telegram Bot: Not configured.")
+        except Exception as e:
+            logger.warning(f"Telegram init failed: {e}")
+            print(f"⚠️  Telegram init error: {e}")
     else:
-        print("⚠️  Telegram Bot: Module not loaded. Install notifications/telegram_alert.py")
+        print("⚠️  Telegram Bot: Module not loaded.")
 
     # ── Step 1: Fetch Announcements ──────────────────────────
-    print("\n📡 STEP 1: Fetching NSE Corporate Announcements...\n")
-
+    print("\n📡 STEP 1: Fetching NSE Announcements...\n")
     try:
         raw_data = get_nse_announcements()
     except Exception as e:
@@ -366,14 +384,13 @@ def main():
         sys.exit(1)
 
     if not raw_data:
-        print("⚠️  No announcements fetched. Internet issue?")
+        print("⚠️  No announcements fetched. Check internet connection.")
         sys.exit(0)
 
     print(f"✅ Fetched {len(raw_data)} announcements from NSE.\n")
 
     # ── Step 2: Full Analysis ────────────────────────────────
-    print("🧠 STEP 2: Full Analysis — Sentiment → Live Price → PEAD → Confirmation...\n")
-
+    print("🧠 STEP 2: Running Analysis Pipeline...\n")
     try:
         analyzed_data = process_analysis(raw_data)
     except Exception as e:
@@ -385,40 +402,50 @@ def main():
 
     print(f"\n✅ Analysis complete for {len(analyzed_data)} announcements.\n")
 
-    # ── Step 3: Send Telegram Alerts ─────────────────────────
+    # ── Step 3: Telegram Alerts ──────────────────────────────
     print("📱 STEP 3: Sending Telegram Alerts...\n")
     send_telegram_alerts(telegram, analyzed_data)
 
     # ── Step 4: Display Results ──────────────────────────────
     print_header("📊 FINAL REPORT — CONFIRMATION SCORE ANALYSIS")
 
-    # Summary
+    # Summary table
     print_summary(analyzed_data)
 
-    # Confirmed Picks (compact table)
+    # Tier-wise compact tables
     print_confirmed_picks(analyzed_data)
 
-    # All Announcements Detail
+    # Full detail for all announcements
     if SHOW_ALL_ANNOUNCEMENTS:
         print_separator("=", 90)
-        print("📋 ALL ANNOUNCEMENTS — FULL DETAILS")
+        print(f"{'📋 ALL ANNOUNCEMENTS — FULL DETAILS':^90}")
         print_separator("=", 90)
-
         for idx, ann in enumerate(analyzed_data, 1):
             print_announcement_detail(ann, idx)
 
-    # ── Footer ───────────────────────────────────────────────
-total_strong   = len([d for d in analyzed_data if d.get("confirmation_tier") == "🔥 STRONG CONFIRMED"])
-total_moderate = len([d for d in analyzed_data if d.get("confirmation_tier") == "✅ MODERATELY CONFIRMED"])
-total_watch    = len([d for d in analyzed_data if d.get("confirmation_tier") == "👀 WATCHLIST"])
-total_noaction = len([d for d in analyzed_data if d.get("confirmation_tier") == "⛔ NO ACTION"])
+    # ── Footer Stats ─────────────────────────────────────────
+    total_strong   = len([d for d in analyzed_data if d.get("confirmation_tier") == "🔥 STRONG CONFIRMED"])
+    total_moderate = len([d for d in analyzed_data if d.get("confirmation_tier") == "✅ MODERATELY CONFIRMED"])
+    total_watch    = len([d for d in analyzed_data if d.get("confirmation_tier") == "👀 WATCHLIST"])
+    total_noaction = len([d for d in analyzed_data if d.get("confirmation_tier") == "⛔ NO ACTION"])
 
-print_separator("=", 90)
-print(f"📊 FINAL STATS")
-print(f"  🔥 Strong Confirmed      : {total_strong}")
-print(f"  ✅ Moderately Confirmed : {total_moderate}")
-print(f"  👀 Watchlist             : {total_watch}")
-print(f"  ⛔ No Action             : {total_noaction}")
-print_separator("=", 90)
-print(f"\n✅ Analysis complete. Logs saved to 'agent.log'.")
-print_separator("=", 90)
+    print_separator("=", 90)
+    print(f"{'📊 SESSION STATS':^90}")
+    print_separator("-", 90)
+    print(f"  🔥 Strong Confirmed      : {total_strong}")
+    print(f"  ✅ Moderately Confirmed  : {total_moderate}")
+    print(f"  👀 Watchlist             : {total_watch}")
+    print(f"  ⛔ No Action             : {total_noaction}")
+    print(f"  📦 Total Processed       : {len(analyzed_data)}")
+    print_separator("=", 90)
+    print(f"  ⏰ Completed At          : {datetime.now().strftime('%d-%m-%Y %H:%M:%S')}")
+    print(f"  📁 Logs saved to         : agent.log")
+    print_separator("=", 90)
+
+
+# ─────────────────────────────────────────────────────────────
+# Entry Point
+# ─────────────────────────────────────────────────────────────
+
+if __name__ == "__main__":
+    main()
