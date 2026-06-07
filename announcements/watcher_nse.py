@@ -129,7 +129,6 @@ def _extract_symbol(company_name: str, title: str = "") -> str:
     # Isin code
     isin_match = re.search(r'[A-Z]{2}\d{2}[A-Z]{2}\d{7}', text)
     if isin_match:
-        # Map isin → symbol logic can be extended
         pass
 
     # Known symbols (top NSE 200)
@@ -146,6 +145,7 @@ def _extract_symbol(company_name: str, title: str = "") -> str:
         "TATACONSUM", "DIVISLAB", "SBILIFE", "DRREDDY", "BAJAJ-AUTO",
         "GRASIM", "HDFCLIFE", "INDUSINDBK", "CIPLA", "OLAELEC",
         "IRCTC", "VEDL", "IOC", "GAIL", "BEL",
+        "RELINFRA", "INFRAINVEST", "RIL",
     ]
 
     for sym in known:
@@ -153,7 +153,7 @@ def _extract_symbol(company_name: str, title: str = "") -> str:
             return sym
 
     # First uppercase word (min 2 chars, not THE / LTD / LIMITED / NSE / BSE)
-    skip = {"THE", "LTD", "LIMITED", "NSE", "BSE", "AND", "FOR", "OF", "IN"}
+    skip = {"THE", "LTD", "LIMITED", "NSE", "BSE", "AND", "FOR", "OF", "IN", "COMPANY", "CORPORATION"}
     for word in text.split():
         if word.isupper() and len(word) >= 2 and word not in skip:
             return word
@@ -197,6 +197,13 @@ def fetch_jugaad_data() -> List[Dict]:
     Fetch corporate announcements using jugaad-data library.
 
     Install: pip install jugaad-data
+    
+    jugaad-data returns dict with keys:
+      - symbol/sym: Stock symbol
+      - company/companyName/compName: Company name
+      - desc: Description/Subject
+      - dt/date: Date in DDMMYYYYHH format
+      - att/attachment/pdf_url: PDF link
     """
     try:
         from jugaad_data.nse import NSELive
@@ -216,16 +223,28 @@ def fetch_jugaad_data() -> List[Dict]:
 
         logger.info(f"jugaad-data: Got {len(announcements)} items.")
 
-        for item in announcements[:100]:
+        for item in announcements[:150]:
             if not isinstance(item, dict):
                 continue
 
-            # jugaad-data fields: dt, sym, desc, company, pdf_url
+            # ⭐ Extract fields from jugaad-data
+            symbol = _safe_text(item.get("symbol", item.get("sym", "")))
+            
+            # Company name — try multiple fields
+            company = _safe_text(
+                item.get("company", 
+                item.get("companyName", 
+                item.get("compName", 
+                item.get("comp_name", symbol))))  # Fallback to symbol
+            )
+            
+            # If company still empty, skip
+            if not company or company == "":
+                company = symbol if symbol else "Unknown"
+            
+            subject = _safe_text(item.get("desc", item.get("description", item.get("subject", "N/A"))))
             date_str = str(item.get("dt", item.get("date", "")))
-            company  = _safe_text(item.get("company", item.get("comp_name", "N/A")))
-            symbol   = _safe_text(item.get("sym", item.get("symbol", "")))
-            subject  = _safe_text(item.get("desc", item.get("description", item.get("subject", "N/A"))))
-            pdf_url  = _build_pdf_url(item.get("pdf_url", item.get("attachment", "")))
+            pdf_url = _build_pdf_url(item.get("att", item.get("attachment", item.get("pdf_url", ""))))
 
             date = _parse_date(date_str)
             if not date or date == date_str[:10]:
@@ -237,7 +256,7 @@ def fetch_jugaad_data() -> List[Dict]:
             raw.append({
                 "date": date,
                 "company": company,
-                "symbol": symbol,
+                "symbol": symbol if symbol else "N/A",
                 "subject": subject,
                 "pdf_url": pdf_url,
                 "source": "NSE",
@@ -627,7 +646,7 @@ if __name__ == "__main__":
     print(f"Total items: {len(results)}")
     print("=" * 80)
 
-    for idx, item in enumerate(results[:15], 1):
+    for idx, item in enumerate(results[:20], 1):
         print(f"\n{'─' * 70}")
         print(f"  #{idx}")
         print(f"  📅 Date    : {item.get('date', 'N/A')}")
