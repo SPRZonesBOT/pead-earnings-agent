@@ -4,7 +4,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# Official NSE API endpoint
 NSE_API_URL = "https://www.nseindia.com/api/corporate-announcements"
 
 HEADERS = {
@@ -21,7 +20,9 @@ def get_nse_announcements():
         session = requests.Session()
         session.headers.update(HEADERS)
 
-        # Get today's date in required format
+        # Visit NSE home first to get cookies
+        session.get("https://www.nseindia.com/", timeout=TIMEOUT)
+
         today = datetime.now().strftime("%d-%m-%Y")
 
         params = {
@@ -35,12 +36,8 @@ def get_nse_announcements():
             params=params,
             timeout=TIMEOUT
         )
-
-        if response.status_code == 403:
-            logger.error("NSE API blocked access (403 Forbidden). Trying alternative method...")
-            return []
-
         response.raise_for_status()
+
         data = response.json()
 
         announcements = []
@@ -60,8 +57,7 @@ def get_nse_announcements():
                     "source": "NSE"
                 })
 
-            except Exception as e:
-                logger.warning(f"NSE parse error: {e}")
+            except Exception:
                 continue
 
         logger.info(f"NSE: Fetched {len(announcements)} announcements")
@@ -70,9 +66,3 @@ def get_nse_announcements():
     except Exception as e:
         logger.error(f"NSE fetch failed: {e}")
         return []
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    data = get_nse_announcements()
-    for row in data:
-        print(f"{row['date']} | {row['company']} | {row['subject']}")
