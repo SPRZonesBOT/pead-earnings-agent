@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 import re
 from config import BSE_ANNOUNCEMENTS_URL, HEADERS, RESULT_KEYWORDS, FOCUS_COMPANIES
-from db import db
+from database.db import db 
 
 def clean_text(text):
     return re.sub(r"\s+", " ", text or "").strip()
