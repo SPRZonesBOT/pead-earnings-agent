@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 BSE_ANNOUNCEMENTS_URL = "https://www.bseindia.com/corporates/ann.html"
 
 PAST_DAYS = 7
-FUTURE_DAYS = 15
+FUTURE_DAYS = 7
 LOOKBACK_NOTICE_DAYS = 45
 REQUEST_TIMEOUT = 20
 
