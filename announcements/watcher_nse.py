@@ -19,72 +19,56 @@ TIMEOUT = 30
 
 
 def get_nse_announcements():
+    """
+    Fetch corporate announcements from NSE India official API.
+    Returns list of dicts with keys: date, company, subject, source.
+    """
     try:
         session = requests.Session()
         session.headers.update(HEADERS)
 
+        # Step 1: Visit homepage to get cookies/session
         session.get(NSE_HOME, timeout=TIMEOUT)
 
+        # Step 2: Fetch announcements for today
         today = datetime.now().strftime("%d-%m-%Y")
+        yesterday = (datetime.now() - timedelta(days=1)).strftime("%d-%m-%Y")
+
         params = {
             "index": "equities",
-            "from_date": today,
+            "from_date": yesterday,
             "to_date": today,
         }
 
         response = session.get(NSE_API, params=params, timeout=TIMEOUT)
-
-        logger.info(f"NSE status: {response.status_code}")
-        logger.info(f"NSE content type: {response.headers.get('Content-Type')}")
-
         response.raise_for_status()
 
-        try:
-            data = response.json()
-        except Exception as e:
-            logger.error(f"NSE JSON parse failed: {e}")
-            logger.error(f"Raw response: {response.text[:500]}")
-            return []
+        data = response.json()
 
-        logger.info(f"NSE raw type: {type(data)}")
+        # Handle both list and dict responses
+        items = data if isinstance(data, list) else data.get("data") or []
 
         announcements = []
-
-        if isinstance(data, list):
-            items = data
-        elif isinstance(data, dict):
-            items = data.get("data") or data.get("records") or data.get("items") or []
-        else:
-            logger.warning("NSE response is neither list nor dict")
-            return []
-
-        logger.info(f"NSE items found: {len(items)}")
-
         for item in items:
             if not isinstance(item, dict):
                 continue
-
-            date_str = (
-                item.get("anndate")
-                or item.get("date")
-                or item.get("announcementDate")
-                or item.get("annDt")
-                or ""
-            )
 
             company = (
                 item.get("symbol")
                 or item.get("companyName")
                 or item.get("compName")
-                or item.get("company")
                 or ""
             )
-
             subject = (
                 item.get("desc")
                 or item.get("subject")
                 or item.get("title")
-                or item.get("details")
+                or ""
+            )
+            date_str = (
+                item.get("anndate")
+                or item.get("date")
+                or item.get("announcementDate")
                 or ""
             )
 
@@ -93,14 +77,17 @@ def get_nse_announcements():
 
             announcements.append({
                 "date": date_str,
-                "company": company,
-                "subject": subject,
-                "source": "NSE"
+                "company": company.strip(),
+                "subject": subject.strip(),
+                "source": "NSE",
             })
 
-        logger.info(f"NSE: Fetched {len(announcements)} announcements")
+        logger.info(f"NSE: {len(announcements)} announcements fetched")
         return announcements
 
+    except requests.exceptions.RequestException as e:
+        logger.error(f"NSE request failed: {e}")
+        return []
     except Exception as e:
-        logger.error(f"NSE fetch failed: {e}")
+        logger.error(f"NSE unexpected error: {e}")
         return []
