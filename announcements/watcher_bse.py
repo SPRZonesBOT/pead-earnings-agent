@@ -1,3 +1,12 @@
+import requests
+import logging  # <--- Ye check karein
+from bs4 import BeautifulSoup
+
+# ✅ Ye line zaroor honi chahiye
+logger = logging.getLogger(__name__)
+
+# ... baaki code ...
+
 def get_bse_announcements():
     try:
         # BSE ka alternative API (no blocking)
