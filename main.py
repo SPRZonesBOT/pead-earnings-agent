@@ -408,4 +408,17 @@ def main():
             print_announcement_detail(ann, idx)
 
     # ── Footer ───────────────────────────────────────────────
-    total_strong   = len([d for d
+total_strong   = len([d for d in analyzed_data if d.get("confirmation_tier") == "🔥 STRONG CONFIRMED"])
+total_moderate = len([d for d in analyzed_data if d.get("confirmation_tier") == "✅ MODERATELY CONFIRMED"])
+total_watch    = len([d for d in analyzed_data if d.get("confirmation_tier") == "👀 WATCHLIST"])
+total_noaction = len([d for d in analyzed_data if d.get("confirmation_tier") == "⛔ NO ACTION"])
+
+print_separator("=", 90)
+print(f"📊 FINAL STATS")
+print(f"  🔥 Strong Confirmed      : {total_strong}")
+print(f"  ✅ Moderately Confirmed : {total_moderate}")
+print(f"  👀 Watchlist             : {total_watch}")
+print(f"  ⛔ No Action             : {total_noaction}")
+print_separator("=", 90)
+print(f"\n✅ Analysis complete. Logs saved to 'agent.log'.")
+print_separator("=", 90)
