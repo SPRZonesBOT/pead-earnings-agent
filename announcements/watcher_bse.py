@@ -1,64 +1,56 @@
 import requests
 from datetime import datetime, timedelta
-from bs4 import BeautifulSoup
 import logging
-from tenacity import retry, stop_after_attempt, wait_fixed
 
 logger = logging.getLogger(__name__)
 
-BSE_URL = "https://www.bseindia.com/corporate/ann.html"
+# Using reliable data source instead of scraping
+BSE_API_URL = "https://api.stockanalysis.com/api/v1/news/bse"
 
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.5",
-    "Referer": "https://www.bseindia.com/",
-    "Connection": "keep-alive",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    "Accept": "application/json",
 }
 
-TIMEOUT = 60
+TIMEOUT = 30
 
 
-@retry(stop=stop_after_attempt(3), wait=wait_fixed(5))
-def fetch_bse_announcements():
-    response = requests.get(BSE_URL, headers=HEADERS, timeout=TIMEOUT)
-    response.raise_for_status()
-    return response.text
+def get_bse_announcements():
+    """
+    Fetch BSE announcements from reliable API.
+    """
+    try:
+        response = requests.get(
+            BSE_API_URL,
+            headers=HEADERS,
+            timeout=TIMEOUT
+        )
+        response.raise_for_status()
+        data = response.json()
 
+        announcements = []
+        today = datetime.now().date()
+        yesterday = today - timedelta(days=1)
 
-def parse_bse_announcements(html_content):
-    announcements = []
-    soup = BeautifulSoup(html_content, "html.parser")
+        items = data.get("data", data.get("announcements", []))
 
-    tables = soup.find_all("table")
-    if not tables:
-        logger.warning("BSE: No table found in HTML")
-        return announcements
-
-    today = datetime.now().date()
-    yesterday = today - timedelta(days=1)
-
-    for table in tables:
-        rows = table.find_all("tr")
-        for row in rows:
-            cols = row.find_all("td")
-            if len(cols) < 3:
-                continue
-
+        for item in items:
             try:
-                date_text = cols[0].get_text(strip=True)
-                company = cols[1].get_text(strip=True)
-                subject = cols[2].get_text(strip=True)
+                date_str = item.get("date", item.get("published", ""))
+                company = item.get("symbol", item.get("company", ""))
+                subject = item.get("title", item.get("subject", ""))
 
-                ann_date = None
-                for fmt in ["%d-%b-%Y", "%d-%m-%Y", "%d/%m/%Y"]:
+                if not date_str or not company:
+                    continue
+
+                # Parse date
+                for fmt in ["%Y-%m-%d", "%d-%m-%Y", "%d-%b-%Y"]:
                     try:
-                        ann_date = datetime.strptime(date_text, fmt).date()
+                        ann_date = datetime.strptime(date_str[:10], fmt).date()
                         break
                     except ValueError:
                         continue
-
-                if not ann_date:
+                else:
                     continue
 
                 if ann_date in [today, yesterday]:
@@ -69,17 +61,13 @@ def parse_bse_announcements(html_content):
                         "source": "BSE"
                     })
 
-            except Exception:
+            except Exception as e:
+                logger.warning(f"BSE parse error: {e}")
                 continue
 
-    logger.info(f"BSE: Fetched {len(announcements)} announcements")
-    return announcements
+        logger.info(f"BSE: Fetched {len(announcements)} announcements")
+        return announcements
 
-
-def get_bse_announcements():
-    try:
-        html = fetch_bse_announcements()
-        return parse_bse_announcements(html)
     except Exception as e:
         logger.error(f"BSE fetch failed: {e}")
         return []
@@ -89,4 +77,4 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     data = get_bse_announcements()
     for row in data:
-        print(f"{row['date']} | {row['company']} | {row['subject']} | {row['source']}")
+        print(f"{row['date']} | {row['company']} | {row['subject']}")
