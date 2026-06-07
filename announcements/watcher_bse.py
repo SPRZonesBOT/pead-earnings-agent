@@ -1,16 +1,14 @@
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime
 import logging
 
 logger = logging.getLogger(__name__)
 
-# Official BSE API endpoint
-BSE_API_URL = "https://api.bseindia.com/CorporateAPI/api/GetCorporateActions"
+BSE_API_URL = "https://api.bseindia.com/BseIndiaAPI/api/AnnGetData/w"
 
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
     "Accept": "application/json",
-    "Accept-Language": "en-US,en;q=0.9",
     "Referer": "https://www.bseindia.com/",
 }
 
@@ -21,34 +19,38 @@ def get_bse_announcements():
         session = requests.Session()
         session.headers.update(HEADERS)
 
-        # Get today's date in required format
-        today = datetime.now().strftime("%d%%2F%m%%2F%Y")
+        today = datetime.now().strftime("%d/%m/%Y")
 
-        params = {
-            "type": "Announcements",
-            "from_date": today,
-            "to_date": today,
+        payload = {
+            "scripcode": "",
+            "strSearch": "",
+            "strType": "C",
+            "strToDate": today,
+            "strFromDate": today,
+            "strPrevDate": "",
+            "segment": "E",
+            "strSector": "",
+            "strIndustry": "",
+            "strGroup": "",
+            "strSubGroup": ""
         }
 
-        response = session.get(
+        response = session.post(
             BSE_API_URL,
-            params=params,
+            json=payload,
+            headers=HEADERS,
             timeout=TIMEOUT
         )
-
-        if response.status_code == 403:
-            logger.error("BSE API blocked access (403 Forbidden). Trying alternative method...")
-            return []
-
         response.raise_for_status()
+
         data = response.json()
 
         announcements = []
-        for item in data:
+        for item in data.get("Table", []):
             try:
-                date_str = item.get("Anndate", "")
-                company = item.get("Sm", "")
-                subject = item.get("Desc", "")
+                date_str = item.get("NewsDt", "")
+                company = item.get("ScripName", "")
+                subject = item.get("NewsSub", "")
 
                 if not date_str or not company:
                     continue
@@ -60,8 +62,7 @@ def get_bse_announcements():
                     "source": "BSE"
                 })
 
-            except Exception as e:
-                logger.warning(f"BSE parse error: {e}")
+            except Exception:
                 continue
 
         logger.info(f"BSE: Fetched {len(announcements)} announcements")
@@ -70,9 +71,3 @@ def get_bse_announcements():
     except Exception as e:
         logger.error(f"BSE fetch failed: {e}")
         return []
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    data = get_bse_announcements()
-    for row in data:
-        print(f"{row['date']} | {row['company']} | {row['subject']}")
