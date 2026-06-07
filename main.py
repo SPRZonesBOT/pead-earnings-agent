@@ -1,20 +1,20 @@
 import logging
-from announcements.watcher_bse import get_bse_announcements
 from announcements.watcher_nse import get_nse_announcements
+from announcements.watcher_bse import get_bse_announcements
 
+# ✅ Logger setup fixed
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
 )
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)   # <-- This line was missing
 
 
 def main():
-    """Main entry point for PEAD Earnings Agent."""
     logger.info("🚀 Starting PEAD Earnings Agent...")
 
-    # Fetch NSE announcements
+    # NSE Announcements
     try:
         logger.info("Fetching NSE Announcements...")
         nse_data = get_nse_announcements()
@@ -23,7 +23,7 @@ def main():
         logger.error(f"NSE fetch crashed: {e}")
         nse_data = []
 
-    # Fetch BSE announcements
+    # BSE Announcements
     try:
         logger.info("Fetching BSE Announcements...")
         bse_data = get_bse_announcements()
@@ -32,14 +32,13 @@ def main():
         logger.error(f"BSE fetch crashed: {e}")
         bse_data = []
 
-    # Combine results
     all_announcements = nse_data + bse_data
 
     if not all_announcements:
         logger.warning("⚠️ No announcements found. This is expected if markets are closed or no new filings today.")
         return
 
-    # Pretty print table
+    # Print results
     print("\n" + "=" * 110)
     print(f"{'SOURCE':<8} | {'DATE':<14} | {'COMPANY':<30} | SUBJECT")
     print("=" * 110)
