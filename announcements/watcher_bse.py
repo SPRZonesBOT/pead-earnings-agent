@@ -24,12 +24,11 @@ BSE_API_URL = (
 BSE_FALLBACK_URL = "https://www.bseindia.com/corporates/announcements.aspx"
 
 # ─────────────────────────────────────────────
-# STEP 1: Try BSE JSON API (faster, cleaner)
+# STEP 1: Try BSE JSON API (with better error handling)
 # ─────────────────────────────────────────────
 def fetch_bse_via_api() -> List[Dict]:
     """
     BSE has a public JSON API for announcements.
-    Try this first — much cleaner than scraping HTML.
     """
     raw_data = []
     try:
@@ -39,11 +38,32 @@ def fetch_bse_via_api() -> List[Dict]:
             timeout=20
         )
         response.raise_for_status()
-        data = response.json()
 
-        items = data.get("Table", [])
+        # Check if response is actually JSON
+        try:
+            data = response.json()
+        except ValueError as e:
+            logger.error(f"BSE API did not return valid JSON: {e}")
+            logger.debug(f"Response type: {type(response.text)}, First 100 chars: {response.text[:100]}")
+            return []
+
+        # Handle different response formats
+        if isinstance(data, dict):
+            items = data.get("Table", [])
+        elif isinstance(data, list):
+            items = data
+        else:
+            logger.error(f"Unexpected BSE API response format: {type(data)}")
+            return []
+
+        if not items:
+            logger.warning("BSE API returned empty results.")
+            return []
 
         for item in items[:50]:  # limit to latest 50
+            if not isinstance(item, dict):
+                continue
+
             # Build PDF URL if attachment exists
             attachment = item.get("ATTACHMENTNAME", "").strip()
             pdf_url = ""
@@ -51,10 +71,10 @@ def fetch_bse_via_api() -> List[Dict]:
                 pdf_url = f"https://www.bseindia.com/xml-data/corpfiling/AttachLive/{attachment}"
 
             raw_data.append({
-                "date":    item.get("NEWS_DT", "")[:10],
-                "company": item.get("SLONGNAME", "N/A").strip(),
-                "subject": item.get("NEWSSUB", "N/A").strip(),
-                "symbol":  item.get("SCRIP_CD", "N/A"),
+                "date":    str(item.get("NEWS_DT", ""))[:10],
+                "company": str(item.get("SLONGNAME", "N/A")).strip(),
+                "subject": str(item.get("NEWSSUB", "N/A")).strip(),
+                "symbol":  str(item.get("SCRIP_CD", "N/A")),
                 "pdf_url": pdf_url,
                 "source":  "BSE"
             })
@@ -64,7 +84,7 @@ def fetch_bse_via_api() -> List[Dict]:
     except requests.exceptions.Timeout:
         logger.error("BSE API timed out.")
     except Exception as e:
-        logger.error(f"BSE API unexpected error: {e}")
+        logger.error(f"BSE API unexpected error: {e}", exc_info=False)
 
     return raw_data
 
@@ -75,7 +95,6 @@ def fetch_bse_via_api() -> List[Dict]:
 def fetch_bse_via_scraper() -> List[Dict]:
     """
     Fallback HTML scraper if JSON API fails.
-    Retries once after 2 seconds.
     """
     raw_data = []
     for attempt in range(2):
@@ -85,20 +104,28 @@ def fetch_bse_via_scraper() -> List[Dict]:
                 headers=HEADERS,
                 timeout=25
             )
+            response.raise_for_status()
             soup = BeautifulSoup(response.text, "html.parser")
 
-            # Try to find the announcements table
-            table = soup.find(
-                "table",
-                {"id": "ctl00_ContentPlaceHolder1_gvAnn"}
-            )
+            # Try multiple table selectors (in case structure changed)
+            table = None
+            selectors = [
+                ("table", {"id": "ctl00_ContentPlaceHolder1_gvAnn"}),
+                ("table", {"class": "announcement-table"}),
+                ("table", {"summary": "Announcements"}),
+            ]
+
+            for tag, attrs in selectors:
+                table = soup.find(tag, attrs)
+                if table:
+                    logger.info(f"Found table with selector: {attrs}")
+                    break
 
             if table:
                 rows = table.find_all("tr")[1:51]  # skip header, max 50
                 for row in rows:
                     cols = row.find_all("td")
                     if len(cols) >= 4:
-
                         # Extract PDF link if exists
                         pdf_url = ""
                         link_tag = cols[2].find("a")
@@ -117,11 +144,13 @@ def fetch_bse_via_scraper() -> List[Dict]:
                             "pdf_url": pdf_url,
                             "source":  "BSE"
                         })
-                break  # success — exit retry loop
+                break
 
             else:
-                logger.warning("BSE scraper: Table not found in HTML.")
-                break
+                logger.warning("BSE scraper: Announcement table not found.")
+                if attempt == 0:
+                    logger.warning("Retrying with different selectors...")
+                    time.sleep(2)
 
         except Exception as e:
             if attempt == 0:
@@ -134,22 +163,21 @@ def fetch_bse_via_scraper() -> List[Dict]:
 
 
 # ─────────────────────────────────────────────
-# STEP 3: Main function (used by main.py)
+# STEP 3: Main function
 # ─────────────────────────────────────────────
 def get_bse_announcements() -> List[Dict]:
     """
-    Full pipeline:
+    Full pipeline with fallback:
     1. Try BSE JSON API first
     2. Fallback to HTML scraper if API fails
     3. Apply keyword filter + duplicate filter
     4. Return only relevant, fresh announcements
     """
-    # Try API first
+    logger.info("Attempting BSE API fetch...")
     raw = fetch_bse_via_api()
 
-    # Fallback to scraper if API returned nothing
     if not raw:
-        logger.warning("BSE API returned nothing. Trying HTML scraper...")
+        logger.warning("BSE API returned nothing. Falling back to HTML scraper...")
         raw = fetch_bse_via_scraper()
 
     if not raw:
@@ -157,14 +185,10 @@ def get_bse_announcements() -> List[Dict]:
         return []
 
     filtered = process_announcements(raw)
-
     logger.info(f"BSE: {len(raw)} fetched → {len(filtered)} passed filter.")
     return filtered
 
 
-# ─────────────────────────────────────────────
-# Quick standalone test
-# ─────────────────────────────────────────────
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     results = get_bse_announcements()
