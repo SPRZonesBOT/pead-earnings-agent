@@ -1,3 +1,12 @@
+import requests
+import logging  # <--- Ye check karein
+from datetime import datetime, timedelta
+
+# ✅ Ye line zaroor honi chahiye
+logger = logging.getLogger(__name__) 
+
+# ... baaki code ...
+
 def get_nse_announcements():
     try:
         session = requests.Session()
