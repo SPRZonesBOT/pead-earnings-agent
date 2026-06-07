@@ -6,6 +6,7 @@ import re
 import yfinance as yf
 import logging
 from datetime import datetime, timedelta
+from analysis.confirmation_scorer import compute_confirmation_score
 
 logger = logging.getLogger(__name__)
 
