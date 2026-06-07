@@ -4,6 +4,12 @@ from typing import List, Dict
 
 import requests
 from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
 
 from announcements.filters import process_announcements
 
@@ -144,6 +150,85 @@ def fetch_bse_via_alternative_api() -> List[Dict]:
     return raw_data
 
 
+def fetch_bse_via_selenium() -> List[Dict]:
+    raw_data = []
+    url = "https://www.bseindia.com/corporates/announcements.aspx"
+
+    try:
+        options = webdriver.ChromeOptions()
+        options.add_argument("--headless")
+        options.add_argument("--disable-gpu")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument(f"user-agent={HEADERS['User-Agent']}")
+
+        driver = webdriver.Chrome(
+            service=Service(ChromeDriverManager().install()),
+            options=options
+        )
+
+        logger.info("BSE Selenium: Opening browser...")
+        driver.get(url)
+
+        logger.info("BSE Selenium: Waiting for table to load...")
+        WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, "table#ctl00_ContentPlaceHolder1_gvAnn")
+            )
+        )
+
+        table = driver.find_element(By.CSS_SELECTOR, "table#ctl00_ContentPlaceHolder1_gvAnn")
+        rows = table.find_elements(By.TAG_NAME, "tr")[1:51]
+
+        logger.info(f"BSE Selenium: Found {len(rows)} rows to process.")
+
+        for row in rows:
+            try:
+                cols = row.find_elements(By.TAG_NAME, "td")
+                if len(cols) < 4:
+                    continue
+
+                pdf_url = ""
+                try:
+                    link = cols[2].find_element(By.TAG_NAME, "a")
+                    pdf_url = link.get_attribute("href") or ""
+                except:
+                    pass
+
+                date_text = cols[3].text.strip()[:10] if len(cols) > 3 else ""
+                company_text = cols[1].text.strip() if len(cols) > 1 else ""
+                subject_text = cols[2].text.strip() if len(cols) > 2 else ""
+                symbol_text = cols[0].text.strip() if len(cols) > 0 else ""
+
+                if not date_text or not company_text:
+                    continue
+
+                raw_data.append({
+                    "date": date_text,
+                    "company": company_text,
+                    "subject": subject_text,
+                    "symbol": symbol_text,
+                    "pdf_url": pdf_url,
+                    "source": "BSE",
+                })
+
+            except Exception as row_error:
+                logger.debug(f"BSE Selenium: Error processing row: {row_error}")
+                continue
+
+        driver.quit()
+        logger.info(f"BSE Selenium: Successfully fetched {len(raw_data)} items.")
+
+    except Exception as e:
+        logger.error(f"BSE Selenium scraper failed: {e}")
+        try:
+            driver.quit()
+        except:
+            pass
+
+    return raw_data
+
+
 def fetch_bse_via_scraper() -> List[Dict]:
     raw_data = []
 
@@ -169,6 +254,7 @@ def fetch_bse_via_scraper() -> List[Dict]:
             if not table:
                 logger.warning("BSE scraper: announcement table not found.")
                 if attempt == 0:
+                    logger.info("BSE scraper: Retrying in 2 seconds...")
                     time.sleep(2)
                 continue
 
@@ -184,16 +270,25 @@ def fetch_bse_via_scraper() -> List[Dict]:
                     href = link_tag["href"]
                     pdf_url = href if href.startswith("http") else f"https://www.bseindia.com{href}"
 
+                date_text = cols[3].get_text(strip=True)[:10]
+                company_text = cols[1].get_text(strip=True)
+                subject_text = cols[2].get_text(strip=True)
+                symbol_text = cols[0].get_text(strip=True)
+
+                if not date_text or not company_text:
+                    continue
+
                 raw_data.append({
-                    "date": cols[3].get_text(strip=True)[:10],
-                    "company": cols[1].get_text(strip=True),
-                    "subject": cols[2].get_text(strip=True),
-                    "symbol": cols[0].get_text(strip=True),
+                    "date": date_text,
+                    "company": company_text,
+                    "subject": subject_text,
+                    "symbol": symbol_text,
                     "pdf_url": pdf_url,
                     "source": "BSE",
                 })
 
             if raw_data:
+                logger.info(f"BSE scraper fetched {len(raw_data)} items.")
                 break
 
         except Exception as e:
@@ -215,8 +310,12 @@ def get_bse_announcements() -> List[Dict]:
         raw = fetch_bse_via_alternative_api()
 
     if not raw:
-        logger.warning("BSE APIs returned nothing. Falling back to HTML scraper...")
+        logger.info("Attempting BSE HTML scraper...")
         raw = fetch_bse_via_scraper()
+
+    if not raw:
+        logger.info("Attempting BSE Selenium scraper (JavaScript rendering)...")
+        raw = fetch_bse_via_selenium()
 
     if not raw:
         logger.warning("BSE: No announcements fetched from any source.")
