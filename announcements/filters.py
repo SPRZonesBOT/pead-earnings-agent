@@ -1,78 +1,112 @@
-# announcements/filters.py
-import hashlib
-from typing import Dict, List
+"""
+announcements/filters.py — Filter corporate announcements
 
-# --- Expanded Keyword Filters ---
-RESULT_KEYWORDS = [
-    # Financial Results
-    "financial results",
-    "quarterly results",
-    "q1 results",
-    "q2 results",
-    "q3 results",
-    "q4 results",
-    "fy results",
-    "outcome of board meeting",
-    "standalone results",
-    "consolidated results",
-    
-    # Documents & Filings
-    "investor presentation",
-    "press release",
-    "unaudited financial results",
-    "audited financial results",
-    "annual results",
-    "half yearly results",
-    
-    # Financial Metrics
-    "earnings",
-    "profit & loss",
-    "balance sheet",
-    "cash flow",
-    "cash flow statement",
-    
-    # Corporate Actions
-    "dividend",
-    "dividend declaration",
-    "interim dividend",
-    "final dividend",
-    "buyback",
-    "share buyback",
-    "bonus",
-    "bonus issue",
-    "rights issue",
-    "stock split",
-    "board meeting",
-    "shareholder approval",
+Removes ONLY spam and duplicates.
+Keeps everything else (relaxed filtering).
+"""
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+# ── Keywords that indicate spam / irrelevant announcements ──
+# ONLY these are removed — everything else passes through
+SPAM_KEYWORDS = [
+    "trading window",
+    "trading window-xbrl",
+    "window-xbrl",
+    "disclosure under sebi takeover regulations",
+    "disclosure pursuant to sebi takeover regulations",
+    "secretarial compliance report",
+    "secretarial compliance",
+    "loss of share certificate",
+    "issue of duplicate share certificate",
+    "duplicate share certificate",
+    "closure of trading window",
+    "re-opening of trading window",
+    "compliance certificate under regulation",
+    "due date certificate",
+    "soft copy of the newspaper",
+    "newspaper advertisement",
+    "newspaper publication",
+    "extract of annual return",
+    "format of annual return",
+    "investor complaints",
+    "investor complaint",
+    "regulation 29",
+    "regulation 31",
+    "regulation 40",
+    "intimation of loss",
+    "shareholding pattern statement",
+    "shareholding pattern - promoter",
+    "change in shareholding",
+    "statement of deviation",
+    "deviation and variation",
+    "unitholding pattern",
+    "business responsibility",
+    "business responsibility and sustainability",
+    "annual report only",
+    "certificate regarding",
+    "encumbrance certificate",
 ]
 
-def is_result_announcement(subject: str) -> bool:
-    """Check if announcement is a financial result filing."""
-    subject_lower = subject.lower()
-    return any(keyword in subject_lower for keyword in RESULT_KEYWORDS)
 
-# --- Duplicate Detection ---
-seen_hashes = set()
+def _safe_text(val) -> str:
+    """Safely convert to string."""
+    if val is None:
+        return ""
+    return str(val).strip()
 
-def get_hash(company: str, subject: str, date: str) -> str:
-    """Generate unique hash for an announcement."""
-    raw = f"{company}|{subject}|{date}"
-    return hashlib.md5(raw.encode()).hexdigest()
 
-def is_duplicate(company: str, subject: str, date: str) -> bool:
-    """Check if announcement is already processed."""
-    h = get_hash(company, subject, date)
-    if h in seen_hashes:
+def is_spam(announcement: dict) -> bool:
+    """
+    Check if announcement is SPAM.
+    
+    Very strict: only removes known spam keywords.
+    Everything else passes through.
+    """
+    subject = _safe_text(announcement.get("subject", "")).lower()
+    company = _safe_text(announcement.get("company", "")).lower()
+
+    # Empty subject = spam
+    if not subject or subject in ("n/a", "na", "-", ""):
         return True
-    seen_hashes.add(h)
+
+    # Check spam keywords
+    for keyword in SPAM_KEYWORDS:
+        if keyword.lower() in subject or keyword.lower() in company:
+            return True
+
     return False
 
-# --- Announcement Processor ---
-def process_announcements(raw_announcements: List[Dict]) -> List[Dict]:
-    """Filter and deduplicate announcements."""
+
+def process_announcements(announcements: list) -> list:
+    """
+    Filter announcements:
+      1. Remove SPAM (known irrelevant keywords)
+      2. Remove DUPLICATES
+      3. Keep EVERYTHING else
+    """
     filtered = []
-    for item in raw_announcements:
-        if is_result_announcement(item["subject"]):
-            if not is_duplicate(item["company"], item["subject"], item["date"]):
-                filtered.append(item)
+    seen = set()
+
+    for ann in announcements:
+        # 1. Skip if SPAM
+        if is_spam(ann):
+            continue
+
+        # 2. Skip if DUPLICATE
+        key = (
+            ann.get("date", ""),
+            ann.get("company", "").upper(),
+            ann.get("subject", "")[:50].upper(),
+        )
+        if key in seen:
+            continue
+
+        seen.add(key)
+        filtered.append(ann)
+
+    logger.info(f"Filters: {len(announcements)} in → {len(filtered)} out (removed {len(announcements) - len(filtered)} spam/duplicates)")
     return filtered
