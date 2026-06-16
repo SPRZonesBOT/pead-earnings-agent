@@ -9,7 +9,7 @@ from datetime import datetime
 # All imports - now all files exist
 from announcements.bse_watcher import BSEWatcher
 from database.db_manager import AnnouncementDB
-#from analysis.financial_extractor import FinancialExtractor
+from analysis.financial_extractor import FinancialExtractor
 from notifier_telegram import send_telegram_alert  # Assuming you have this
 
 # State file to avoid duplicate alerts
