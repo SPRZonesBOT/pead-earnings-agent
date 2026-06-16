@@ -16,7 +16,7 @@ class BSEWatcher:
     def __init__(self):
         self.options = Options()
         # Headless mode - background mein chalega (comment karke dekh sakte ho agar debug karna ho)
-        self.options.add_argument('--headless')
+        # self.options.add_argument('--headless')
         self.options.add_argument('--no-sandbox')
         self.options.add_argument('--disable-dev-shm-usage')
         self.options.add_argument('--disable-gpu')
@@ -97,10 +97,10 @@ class BSEWatcher:
             driver = webdriver.Chrome(service=service, options=self.options)
             
             print(f"🔍 Navigating to BSE announcements page...")
-            driver.get("https://www.bseindia.com/corporates/ann.html")
+            driver.get("https://www.bseindia.com/corporates/announcements.html")
             
             # Wait for the announcements table to load
-            wait = WebDriverWait(driver, 20)
+            wait = WebDriverWait(driver, 40)
             wait.until(EC.presence_of_element_located((By.XPATH, "//table//tr")))
             
             # Extra wait for dynamic content
