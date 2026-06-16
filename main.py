@@ -10,7 +10,7 @@ sys.path.append(os.path.dirname(__file__))
 
 from announcements.nse_watcher import NSEWatcher
 from announcements.bse_watcher import BSEWatcher
-from announcements.screener_watcher import ScreenerWatcher   # New
+from announcements.screener_watcher import ScreenerWatcher   # New API-based
 from database.db_manager import AnnouncementDB
 from notifier_telegram import send_telegram_alert
 
@@ -138,7 +138,7 @@ def calculate_pead_score(fin, prev_fin=None):
     else:
         score += 2
 
-    # 6. Quality Check: Margin expansion / contraction – Max 10 points
+    # 6. Quality Check: Margin expansion/contraction – Max 10 points
     if prev_fin and prev_fin.get('ebitda_margin', 0) > 0:
         margin_change = ebitda_margin - prev_fin.get('ebitda_margin', 0)
         if margin_change > 2:
@@ -175,7 +175,7 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False):
     # ---------- Real Data Fetching ----------
     if not no_real and not force_mock:
         # 1. Try Screener.in (most reliable)
-        print("📡 Attempting Screener.in...")
+        print("📡 Attempting Screener.in API...")
         try:
             screener = ScreenerWatcher()
             announcements = screener.get_financial_results()
@@ -257,6 +257,8 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False):
         if 'financials' in ann and ann['financials']:
             fin = ann['financials']
             print(f"   📊 Using Screener financials for {symbol}")
+            # Debug: print extracted values
+            print(f"      Revenue: {fin.get('revenue',0):,.0f}, PAT: {fin.get('pat',0):,.0f}, EBITDA Margin: {fin.get('ebitda_margin',0):.1f}%, PAT Margin: {fin.get('pat_margin',0):.1f}%")
 
         # B. Else try PDF download & parse
         elif ann.get('pdf_url'):
@@ -284,6 +286,7 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False):
         if not fin:
             fin = get_mock_financials(symbol)
             print(f"   📊 Using mock financials for {symbol}")
+            print(f"      Revenue: {fin.get('revenue',0):,.0f}, PAT: {fin.get('pat',0):,.0f}, EBITDA Margin: {fin.get('ebitda_margin',0):.1f}%, PAT Margin: {fin.get('pat_margin',0):.1f}%")
 
         # Get historical data for comparison
         hist_df = db.get_history(symbol)
@@ -364,7 +367,6 @@ if __name__ == "__main__":
     parser.add_argument('--no-real', action='store_true', help='Skip real data fetching, only use mock')
     args = parser.parse_args()
 
-    # If --no-real is passed, force mock
     if args.no_real:
         args.force_mock = True
 
