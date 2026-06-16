@@ -1,136 +1,104 @@
 # announcements/screener_watcher.py
 import requests
-from bs4 import BeautifulSoup
+import json
 import time
-import re
 
 class ScreenerWatcher:
     def __init__(self):
         self.session = requests.Session()
         self.session.headers.update({
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+            'Accept': 'application/json, text/plain, */*',
+            'Referer': 'https://www.screener.in/'
         })
 
     def get_financial_results(self):
-        """
-        Fetch quarterly results from Screener.in.
-        Returns list of top Nifty stocks with financial data.
-        """
-        # Top 30 Nifty stocks (you can expand)
+        """Fetch top Nifty stocks using Screener.in API"""
         nifty_symbols = [
             'RELIANCE', 'TCS', 'HDFCBANK', 'INFY', 'HINDUNILVR',
             'ICICIBANK', 'SBIN', 'KOTAKBANK', 'LT', 'BHARTIARTL',
-            'ITC', 'WIPRO', 'HCLTECH', 'ASIANPAINT', 'TITAN',
-            'MARUTI', 'TATAMOTORS', 'SUNPHARMA', 'NTPC', 'POWERGRID',
-            'TATASTEEL', 'BAJFINANCE', 'AXISBANK', 'HDFC', 'ULTRACEMCO'
+            'ITC', 'WIPRO', 'HCLTECH', 'ASIANPAINT', 'TITAN'
         ]
-        
         announcements = []
-        for symbol in nifty_symbols[:15]:  # Process top 15
+        for symbol in nifty_symbols:
             try:
-                print(f"  Fetching {symbol} from Screener...")
-                data = self._fetch_quarterly_data(symbol)
+                data = self._fetch_quarterly_data_api(symbol)
                 if data:
                     announcements.append({
                         'symbol': symbol,
                         'company': data.get('company_name', symbol),
-                        'pdf_url': None,  # Screener doesn't provide PDFs
+                        'pdf_url': None,
                         'id': f"SCR_{symbol}_{data.get('quarter', '')}",
                         'date': data.get('quarter', ''),
-                        'close_price': data.get('price', 0),
-                        'volume': 0,
-                        'avg_volume': 0,
-                        'financials': data  # Store financial data directly
+                        'financials': data
                     })
-                time.sleep(1)  # Be gentle to Screener
+                    print(f"  ✅ {symbol}: Revenue={data.get('revenue',0):,.0f}, PAT={data.get('pat',0):,.0f}, Margin={data.get('ebitda_margin',0):.1f}%")
+                else:
+                    print(f"  ⚠️ No data for {symbol}")
+                time.sleep(0.5)  # Rate limit
             except Exception as e:
-                print(f"  ⚠️ Failed to fetch {symbol}: {e}")
-        
+                print(f"  ❌ Error {symbol}: {e}")
+
         if announcements:
-            print(f"✅ Fetched {len(announcements)} stocks from Screener.in")
+            print(f"✅ Fetched {len(announcements)} stocks from Screener.in API")
             return announcements
         else:
-            print("⚠️ Screener fetch failed. Falling back to mock data.")
+            print("⚠️ No data from Screener API. Falling back to mock.")
             return []
 
-    def _fetch_quarterly_data(self, symbol):
+    def _fetch_quarterly_data_api(self, symbol):
         """
-        Scrape quarterly results from Screener.in
+        Use Screener.in's JSON API for quarterly results
+        Endpoint: https://www.screener.in/api/company/{symbol}/quick/
         """
-        url = f"https://www.screener.in/company/{symbol}/"
+        url = f"https://www.screener.in/api/company/{symbol}/quick/"
         try:
             response = self.session.get(url, timeout=10)
             if response.status_code != 200:
                 return None
-            
-            soup = BeautifulSoup(response.text, 'html.parser')
-            
-            # Find quarterly results table
-            quarterly_section = soup.find('section', id='quarters')
-            if not quarterly_section:
-                return None
-            
-            data = {}
-            company_name_elem = soup.find('h1', class_='company-name')
-            if company_name_elem:
-                data['company_name'] = company_name_elem.text.strip()
-            
-            # Find latest quarter row
-            rows = quarterly_section.find_all('tr')
-            if len(rows) < 2:
-                return None
-            
-            # First row is header, second is latest quarter
-            latest_row = rows[1]
-            cells = latest_row.find_all('td')
-            if len(cells) < 8:
-                return None
-            
-            data['quarter'] = cells[0].text.strip()
-            
-            # Extract key metrics (positions may vary)
-            try:
-                data['revenue'] = self._clean_number(cells[1].text)
-                data['ebitda'] = self._clean_number(cells[2].text) if len(cells) > 2 else 0
-                data['pat'] = self._clean_number(cells[3].text) if len(cells) > 3 else 0
-                data['eps'] = self._clean_number(cells[4].text) if len(cells) > 4 else 0
-                data['ebitda_margin'] = self._clean_number(cells[5].text) if len(cells) > 5 else 0
-                data['pat_margin'] = self._clean_number(cells[6].text) if len(cells) > 6 else 0
-            except:
-                # If table structure different, return minimal data
-                data['revenue'] = 5000
-                data['pat'] = 500
-                data['ebitda'] = 800
-                data['eps'] = 15
-                data['ebitda_margin'] = 16
-                data['pat_margin'] = 10
-            
-            return data
-            
-        except Exception as e:
-            print(f"  Screener scrape error for {symbol}: {e}")
-            return None
 
-    def _clean_number(self, text):
-        """Convert text to float, handling 'Cr', 'M', '%' etc."""
-        if not text:
-            return 0
-        text = text.replace(',', '').strip()
-        # Handle crores, millions
-        if 'Cr' in text or 'M' in text:
-            text = text.replace('Cr', '').replace('M', '').strip()
-            multiplier = 10000000  # 1 Cr = 10,000,000
-            try:
-                return float(text) * multiplier
-            except:
-                return 0
-        if text.endswith('%'):
-            text = text.rstrip('%')
-        try:
-            return float(text)
-        except:
-            return 0
+            data = response.json()
+            if not data:
+                return None
+
+            result = {}
+            # Extract company name
+            result['company_name'] = data.get('company_name', symbol)
+
+            # Quarterly results are in 'quarters' key
+            quarters = data.get('quarters', [])
+            if not quarters:
+                return None
+
+            # Latest quarter is first in list
+            latest = quarters[0]
+            result['quarter'] = latest.get('date', '')
+
+            # Map fields (keys might be 'revenue', 'profit', etc.)
+            result['revenue'] = latest.get('revenue', 0) or latest.get('sales', 0)
+            result['pat'] = latest.get('profit_after_tax', 0) or latest.get('net_profit', 0)
+            result['ebitda'] = latest.get('ebitda', 0)
+            result['eps'] = latest.get('eps', 0)
+
+            # Margins from latest data or compute
+            ebitda_margin = latest.get('ebitda_margin')
+            if ebitda_margin is None:
+                ebitda_margin = (result['ebitda'] / result['revenue']) * 100 if result['revenue'] else 0
+            result['ebitda_margin'] = ebitda_margin
+
+            pat_margin = latest.get('net_profit_margin')
+            if pat_margin is None:
+                pat_margin = (result['pat'] / result['revenue']) * 100 if result['revenue'] else 0
+            result['pat_margin'] = pat_margin
+
+            # Also store previous quarters for growth later (optional)
+            result['previous_quarters'] = quarters[1:] if len(quarters) > 1 else []
+
+            return result
+
+        except Exception as e:
+            print(f"  API error for {symbol}: {e}")
+            return None
 
     def download_pdf(self, pdf_url):
         return None  # Screener doesn't provide PDFs
