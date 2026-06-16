@@ -15,7 +15,7 @@ class ScreenerWatcher:
         })
 
     def get_financial_results(self):
-        """Fetch top Nifty stocks from Screener.in using HTML parsing"""
+        """Fetch top Nifty stocks from Screener.in using HTML parsing of the quarters table"""
         nifty_symbols = [
             'RELIANCE', 'TCS', 'HDFCBANK', 'INFY', 'HINDUNILVR',
             'ICICIBANK', 'SBIN', 'KOTAKBANK', 'LT', 'BHARTIARTL',
@@ -34,7 +34,7 @@ class ScreenerWatcher:
                         'date': data.get('quarter', ''),
                         'financials': data
                     })
-                    print(f"  ✅ {symbol}: Revenue={data['revenue']:,.0f}, PAT={data['pat']:,.0f}, EBITDA Margin={data['ebitda_margin']:.1f}%, PAT Margin={data['pat_margin']:.1f}%")
+                    print(f"  ✅ {symbol}: Revenue={data['revenue']:,.0f}, PAT={data['pat']:,.0f}, EBITDA Margin={data.get('ebitda_margin', 0):.1f}%, PAT Margin={data.get('pat_margin', 0):.1f}%")
                 else:
                     print(f"  ⚠️ No data for {symbol}")
                 time.sleep(1.5)  # Be gentle
@@ -49,7 +49,11 @@ class ScreenerWatcher:
             return []
 
     def _fetch_quarterly_data(self, symbol):
-        """Scrape quarterly results with dynamic header mapping"""
+        """
+        Scrape the 'quarters' table from the company page.
+        The table has metrics in rows and quarters in columns.
+        We extract the latest quarter (last column).
+        """
         url = f"https://www.screener.in/company/{symbol}/"
         try:
             response = self.session.get(url, timeout=15)
@@ -64,94 +68,73 @@ class ScreenerWatcher:
             if name_elem:
                 data['company_name'] = name_elem.text.strip()
 
-            # Find the quarters table
+            # Find the quarters section
             quarter_section = soup.find('section', id='quarters')
             if not quarter_section:
-                quarter_section = soup.find('table', class_='data-table')
-                if not quarter_section:
-                    return None
+                return None
 
-            # Get all rows
-            rows = quarter_section.find_all('tr')
+            # Find the table inside it (class "data-table")
+            table = quarter_section.find('table', class_='data-table')
+            if not table:
+                return None
+
+            rows = table.find_all('tr')
             if len(rows) < 2:
                 return None
 
-            # ---------- Header mapping ----------
-            header_row = rows[0]
-            headers = [th.get_text(strip=True) for th in header_row.find_all('th')]
-            # Expected columns: Quarter, Sales, EBITDA, PAT, EPS, EBIT Margin, PAT Margin
-            # Map column names to indices
-            col_map = {}
-            for idx, col in enumerate(headers):
-                col_lower = col.lower()
-                if 'quarter' in col_lower or 'period' in col_lower:
-                    col_map['quarter'] = idx
-                elif 'sales' in col_lower or 'revenue' in col_lower:
-                    col_map['revenue'] = idx
-                elif 'ebitda' in col_lower:
-                    col_map['ebitda'] = idx
-                elif 'pat' in col_lower or 'net profit' in col_lower:
-                    col_map['pat'] = idx
-                elif 'eps' in col_lower:
-                    col_map['eps'] = idx
-                elif 'ebit margin' in col_lower or 'ebitda margin' in col_lower:
-                    col_map['ebitda_margin'] = idx
-                elif 'pat margin' in col_lower or 'net profit margin' in col_lower:
-                    col_map['pat_margin'] = idx
-
-            # If we didn't find critical columns, try alternative mapping (some tables have different order)
-            if 'revenue' not in col_map or 'pat' not in col_map:
-                # Fallback: assume standard order: Quarter, Revenue, EBITDA, PAT, EPS, EBIT Margin, PAT Margin
-                # But we can guess: if we have 7 columns, assume that order
-                if len(headers) >= 7:
-                    col_map['quarter'] = 0
-                    col_map['revenue'] = 1
-                    col_map['ebitda'] = 2
-                    col_map['pat'] = 3
-                    col_map['eps'] = 4
-                    col_map['ebitda_margin'] = 5
-                    col_map['pat_margin'] = 6
-                else:
-                    return None
-
-            # ---------- Find latest quarter row ----------
-            # The first row after header that contains a date in the quarter column
-            latest_row = None
+            # Skip header row (index 0)
             for row in rows[1:]:
                 cells = row.find_all('td')
-                if len(cells) <= max(col_map.values()):
+                if len(cells) < 2:
                     continue
-                # Check if quarter cell looks like a date
-                quarter_text = cells[col_map['quarter']].get_text(strip=True)
-                if re.match(r'\d{2}\s\w{3}\s\d{2}', quarter_text):
-                    latest_row = cells
-                    break
 
-            # If no date found, take the second row (might be latest)
-            if not latest_row and len(rows) > 1:
-                latest_row = rows[1].find_all('td')
+                # First cell is the metric name (may contain a button)
+                metric_cell = cells[0]
+                metric_text = metric_cell.get_text(strip=True).lower()
 
-            if not latest_row:
+                # Get all data cells (quarters) after the first one
+                quarter_cells = cells[1:]
+                if not quarter_cells:
+                    continue
+
+                # The latest quarter is the last non-empty cell (rightmost)
+                latest_value = None
+                for cell in reversed(quarter_cells):
+                    text = cell.get_text(strip=True)
+                    if text and text != '-' and text != '':
+                        latest_value = text
+                        break
+
+                if latest_value is None:
+                    continue
+
+                # Map metric name to our fields
+                if 'sales' in metric_text:
+                    data['revenue'] = self._clean_number(latest_value)
+                elif 'operating profit' in metric_text and 'opm' not in metric_text:
+                    data['ebitda'] = self._clean_number(latest_value)
+                elif 'net profit' in metric_text:
+                    data['pat'] = self._clean_number(latest_value)
+                elif 'eps' in metric_text:
+                    data['eps'] = self._clean_number(latest_value)
+                elif 'opm %' in metric_text:
+                    data['ebitda_margin'] = self._clean_percent(latest_value)
+                elif 'pat margin' in metric_text:
+                    data['pat_margin'] = self._clean_percent(latest_value)
+                # You can add more fields if needed (e.g., Interest, Other Income)
+
+            # If we didn't get revenue, fail
+            if 'revenue' not in data or data['revenue'] == 0:
                 return None
 
-            # Extract values
-            data['quarter'] = latest_row[col_map['quarter']].get_text(strip=True)
-            data['revenue'] = self._clean_number(latest_row[col_map['revenue']].get_text(strip=True)) if 'revenue' in col_map else 0
-            data['ebitda'] = self._clean_number(latest_row[col_map['ebitda']].get_text(strip=True)) if 'ebitda' in col_map else 0
-            data['pat'] = self._clean_number(latest_row[col_map['pat']].get_text(strip=True)) if 'pat' in col_map else 0
-            data['eps'] = self._clean_number(latest_row[col_map['eps']].get_text(strip=True)) if 'eps' in col_map else 0
-            data['ebitda_margin'] = self._clean_percent(latest_row[col_map['ebitda_margin']].get_text(strip=True)) if 'ebitda_margin' in col_map else 0
-            data['pat_margin'] = self._clean_percent(latest_row[col_map['pat_margin']].get_text(strip=True)) if 'pat_margin' in col_map else 0
-
-            # If revenue is zero, scraping failed
-            if data['revenue'] == 0:
-                return None
-
-            # If margins are zero but we have revenue and PAT, compute margins
-            if data['ebitda_margin'] == 0 and data['ebitda'] > 0 and data['revenue'] > 0:
+            # Compute margins if not directly provided
+            if 'ebitda_margin' not in data and 'ebitda' in data and data['revenue'] > 0:
                 data['ebitda_margin'] = (data['ebitda'] / data['revenue']) * 100
-            if data['pat_margin'] == 0 and data['pat'] > 0 and data['revenue'] > 0:
+            if 'pat_margin' not in data and 'pat' in data and data['revenue'] > 0:
                 data['pat_margin'] = (data['pat'] / data['revenue']) * 100
+
+            # We don't have a specific quarter date, but we can set a placeholder
+            data['quarter'] = 'Latest Quarter'
 
             return data
 
@@ -162,7 +145,10 @@ class ScreenerWatcher:
     def _clean_number(self, text):
         if not text:
             return 0
+        # Remove commas and plus signs
         text = text.replace(',', '').strip()
+        text = text.replace('+', '').strip()
+        # Handle crores
         if 'Cr' in text:
             text = text.replace('Cr', '').strip()
             try:
