@@ -1,57 +1,42 @@
+# notifier_telegram.py
 import requests
-from config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+import os
 
-def send_telegram_alert(company, subject, source, ann_datetime, pdf_link=None):
-    """Telegram pe alert bhejo"""
+def send_telegram_alert(message, subject=None, source=None, ann_datetime=None):
+    """
+    Flexible function:
+    - Agar sirf message diya toh woh use hoga
+    - Agar saare arguments diye toh formatted message banta hai
+    """
+    # Agar subject, source, ann_datetime diye hain toh formatted message banao
+    if subject and source and ann_datetime:
+        full_message = f"*{subject}*\nSource: {source}\nTime: {ann_datetime}\n\n{message}"
+    else:
+        full_message = message
+
+    bot_token = os.getenv("TELEGRAM_BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
+    chat_id = os.getenv("TELEGRAM_CHAT_ID", "YOUR_CHAT_ID_HERE")
     
-    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
-        print("⚠️ Telegram config missing")
+    # Agar token set nahi hai toh local print karo
+    if bot_token == "YOUR_BOT_TOKEN_HERE":
+        print("\n" + "="*50)
+        print("📢 TELEGRAM ALERT (Printed locally - Token not set):")
+        print(full_message)
+        print("="*50 + "\n")
         return
-    
-    message = f"""
-🚨 **NEW RESULT ANNOUNCEMENT**
-
-📊 Company: {company}
-🏢 Source: {source}
-📅 Date: {ann_datetime}
-📝 Subject: {subject[:100]}...
-
-"""
-    
-    if pdf_link:
-        message += f"📎 PDF: {pdf_link}\n"
-    
-    message += "\n#PEAD #Results #BSE #NSE"
-    
-    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-    
+        
+    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
     payload = {
-        "chat_id": TELEGRAM_CHAT_ID,
-        "text": message,
+        "chat_id": chat_id,
+        "text": full_message,
         "parse_mode": "Markdown"
     }
     
     try:
         response = requests.post(url, json=payload, timeout=10)
         if response.status_code == 200:
-            print(f"✅ Telegram alert sent: {company}")
+            print("✅ Telegram alert sent successfully!")
         else:
             print(f"❌ Telegram error: {response.text}")
     except Exception as e:
-        print(f"❌ Telegram send failed: {e}")
-
-def send_daily_summary(summary_text):
-    """Daily summary bhejo"""
-    
-    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-    
-    payload = {
-        "chat_id": TELEGRAM_CHAT_ID,
-        "text": summary_text,
-        "parse_mode": "Markdown"
-    }
-    
-    try:
-        requests.post(url, json=payload, timeout=10)
-    except Exception as e:
-        print(f"❌ Summary send failed: {e}")
+        print(f"❌ Failed to send Telegram message: {e}")
