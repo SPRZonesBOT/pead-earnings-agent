@@ -1,27 +1,26 @@
 # config.py
 import os
 
-# Telegram Settings
+# ---------- Telegram ----------
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', 'YOUR_BOT_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', 'YOUR_CHAT_ID')
 
-# Price Fetching
+# ---------- Price Fetching ----------
 ENABLE_PRICE_FETCH = True
 
-# Scoring Thresholds
+# ---------- Scoring Thresholds ----------
 BUY_THRESHOLD = 70
 WATCH_THRESHOLD = 50
 
-# Liquidity Filter (in INR)
+# ---------- Liquidity Filter ----------
 MIN_LIQUIDITY = 5_00_00_000  # 5 Crore
 
 # ================================================================
-# HIGH LIQUIDITY STOCK LIST (~280 stocks)
-# Nifty 200 + Nifty Next 50 + Select Midcaps
-# All have avg daily delivery > 5 Cr
+# STOCK CATEGORIZATION (Based on NSE indices)
 # ================================================================
-NIFTY_200 = [
-    # ---- Nifty 50 (Top 50) ----
+
+# ---- Nifty 50 (Top 50) ----
+NIFTY_50 = [
     'RELIANCE', 'TCS', 'HDFCBANK', 'INFY', 'HINDUNILVR',
     'ICICIBANK', 'SBIN', 'KOTAKBANK', 'LT', 'BHARTIARTL',
     'ITC', 'WIPRO', 'HCLTECH', 'ASIANPAINT', 'TITAN',
@@ -31,70 +30,74 @@ NIFTY_200 = [
     'HINDALCO', 'EICHERMOT', 'COALINDIA', 'BRITANNIA', 'TATACONSUM',
     'HEROMOTOCO', 'BAJAJ-AUTO', 'APOLLOHOSP', 'ONGC', 'SBILIFE',
     'M&M', 'INDUSINDBK', 'UPL', 'PIDILITIND', 'DABUR',
-    'MCDOWELL-N', 'BAJAJFINSV', 'TECHM', 'SHRIRAMFIN', 'HDFCLIFE',
+    'MCDOWELL-N', 'BAJAJFINSV', 'TECHM', 'SHRIRAMFIN', 'HDFCLIFE'
+]
 
-    # ---- Nifty Next 50 (51-100) ----
+# ---- Nifty Next 50 (51-100) ----
+NIFTY_NEXT_50 = [
     'VEDL', 'HINDZINC', 'JINDALSTEL', 'BANKBARODA', 'CANBK',
     'GODREJCP', 'HAL', 'BEL', 'SIEMENS', 'ABB',
     'HAVELLS', 'DIXON', 'ACC', 'BERGEPAINT', 'PAGEIND',
     'COLPAL', 'DALBHARA', 'MUTHOOTFIN', 'CHOLAFIN', 'SRTRANSFIN',
     'PEL', 'VOLTAS', 'CUMMINSIND', 'SKFINDIA', 'DEEPAKNTR',
     'FACT', 'NATIONALUM', 'TATACHEM', 'PETRONET', 'GAIL',
-    'HPCL', 'BPCL', 'IOC', 'MOTHERSUMI', 'EICHERMOT',
-    'INDIGO', 'SPARC', 'LUPIN', 'AUROPHARMA', 'DIVISLAB',
-    'CIPLA', 'TORNTPHARM', 'GLENMARK', 'BIOCON', 'ZYDUSLIFE',
-    'SUNTV', 'ZEEL', 'TVSMOTOR', 'BALKRISIND', 'MRF',
-
-    # ---- Nifty Midcap 100 (101-200) ----
-    'ADANIENT', 'ADANIGREEN', 'GMRINFRA', 'L&T', 'SIEMENS',
-    'BHEL', 'PFC', 'RECLTD', 'POWERGRID', 'ADANITRANS',
-    'MUTHOOTFIN', 'CHOLAFIN', 'MANAPPURAM', 'SHRIRAMFIN', 'ICICIGI',
-    'HDFCAMC', 'SBICARD', 'POLYCAB', 'HONEYWELL', 'THERMAX',
-    'CROMPTON', 'WHIRLPOOL', 'BLUESTAR', 'VOLTAS', 'HAVELLS',
-    'INDUSTOWER', 'TATACOMM', 'TEJASNET', 'IDEA', 'GTLINFRA',
-    'NAUKRI', 'ZOMATO', 'DMART', 'AVANTIFEED', 'RADICO',
-    'CCL', 'VIPIND', 'PVRINOX', 'TITAN', 'SBI',
-    'JUBLFOOD', 'DOMINO', 'BIKAJI', 'NESTLEIND', 'BRITANNIA',
-    'HATSUN', 'VARUNBEV', 'VBL', 'ABFRL', 'ADITYABIRLA',
-
-    # ---- Additional High Liquidity Midcaps (201-230) ----
-    'ASHOKLEY', 'ESCORTS', 'MAHINDRA', 'JSWENERGY', 'JSWINFRA',
-    'APOLLOTYRE', 'CEATLTD', 'BANKINDIA', 'UNIONBANK', 'INDIANB',
-    'CENTRALBK', 'PNB', 'UCOBANK', 'IDFCFIRSTB', 'BANDHANBNK',
-    'RBLBANK', 'YESBANK', 'FEDERALBNK', 'KARNATAKAB', 'TMB',
-    'CUB', 'CSBBANK', 'DCBBANK', 'KARURVYSYA', 'SOUTHBANK',
-    'J&KBANK', 'DOLATALGO', 'ANGELONE', 'MOTILALOFS', 'HDFCSEC',
-    # Financial Services
-    'BAJAJHLDNG', 'BAJAJELEC', 'ADANIENT', 'AWL', 'MAZDOCK',
-    'COCHINSHIP', 'HUDCO', 'NBCC', 'IRFC', 'IREDA',
-    # Real Estate
-    'DLF', 'GODREJPROP', 'OBEROIRLTY', 'PRESTIGE', 'SOBHA',
-    'SUNTECK', 'PHOENIXLTD', 'BRIGADE', 'KOLTE-PATIL',
-    # IT
-    'MINDTREE', 'LTIM', 'TECHM', 'WIPRO', 'MPHASIS',
-    'PERSISTENT', 'CYIENT', 'COFORGE', 'KPITTECH', 'ZENSARTECH',
-    'BIRLASOFT', 'LTI', 'TECHM', 'NIITTECH',
-    # Pharma
-    'JBCHEPHARM', 'ALKEM', 'TORNTPHARM', 'GLENMARK', 'BIOCON',
-    'AUROPHARMA', 'IPCA', 'CADILAHC', 'SANOFI', 'GSK',
-    # Auto Ancillary
-    'MOTHERSON', 'BOSCH', 'MINDACORP', 'MAHINDRA', 'ZF',
-    'SAMVRIDDHI', 'ASK', 'AISL', 'SMLISUZU',
-    # Cement
-    'ACC', 'AMBUJACEM', 'SHREECEM', 'RAMCOCEM', 'HEIDELBERG',
-    'KCP', 'JKLAKSHMI', 'NCLIND',
-    # Metals
-    'SAIL', 'MOIL', 'KIOCL', 'ORIENTALRL', 'SUNFLAG',
-    'JAYASWAL', 'MANALIPETC', 'RAJESHEXPO', 'HINDCOPPER',
-    # Chemicals
-    'TATACHEM', 'DEEPAKNTR', 'SRF', 'AARTIIND', 'PIIND',
-    'NAVINFLUOR', 'SOLARINDS', 'ATUL', 'TATASTL',
-    # Telecom
-    'BHARTIARTL', 'JIO', 'IDEA', 'GTLINFRA', 'TATACOMM',
-    # NBFC
-    'PFC', 'RECLTD', 'BANKBARODA', 'CANBK', 'PNB',
-    'UCOBANK', 'IDFCFIRSTB', 'BANDHANBNK', 'RBLBANK', 'YESBANK'
+    'HPCL', 'BPCL', 'IOC', 'MOTHERSUMI', 'INDIGO',
+    'SPARC', 'LUPIN', 'AUROPHARMA', 'CIPLA', 'TORNTPHARM',
+    'GLENMARK', 'BIOCON', 'ZYDUSLIFE', 'SUNTV', 'ZEEL',
+    'TVSMOTOR', 'BALKRISIND', 'MRF', 'MUTHOOT', 'ICICIPRULI'
 ]
 
-# Default: Use NIFTY_200 if STOCKS_LIST is not set
-STOCKS_LIST = NIFTY_200
+# ---- Nifty Midcap 100 (101-200) ----
+NIFTY_MIDCAP_100 = [
+    'ADANIENT', 'ADANIGREEN', 'GMRINFRA', 'L&T', 'SIEMENS',
+    'BHEL', 'PFC', 'RECLTD', 'ADANITRANS', 'MUTHOOTFIN',
+    'CHOLAFIN', 'MANAPPURAM', 'SHRIRAMFIN', 'ICICIGI', 'HDFCAMC',
+    'SBICARD', 'POLYCAB', 'HONEYWELL', 'THERMAX', 'CROMPTON',
+    'WHIRLPOOL', 'BLUESTAR', 'VOLTAS', 'HAVELLS', 'INDUSTOWER',
+    'TATACOMM', 'TEJASNET', 'IDEA', 'GTLINFRA', 'NAUKRI',
+    'ZOMATO', 'DMART', 'AVANTIFEED', 'RADICO', 'CCL',
+    'VIPIND', 'PVRINOX', 'TITAN', 'SBI', 'JUBLFOOD',
+    'DOMINO', 'BIKAJI', 'NESTLEIND', 'BRITANNIA', 'HATSUN',
+    'VARUNBEV', 'VBL', 'ABFRL', 'ADITYABIRLA', 'MAHINDRA',
+    # additional midcap
+    'ASHOKLEY', 'ESCORTS', 'JSWENERGY', 'JSWINFRA', 'APOLLOTYRE',
+    'CEATLTD', 'BANKINDIA', 'UNIONBANK', 'INDIANB', 'CENTRALBK',
+    'PNB', 'UCOBANK', 'IDFCFIRSTB', 'BANDHANBNK', 'RBLBANK',
+    'YESBANK', 'FEDERALBNK', 'KARNATAKAB', 'TMB', 'CUB',
+    'CSBBANK', 'DCBBANK', 'KARURVYSYA', 'SOUTHBANK', 'J&KBANK',
+    'DOLATALGO', 'ANGELONE', 'MOTILALOFS', 'HDFCSEC', 'BAJAJHLDNG',
+    'BAJAJELEC', 'AWL', 'MAZDOCK', 'COCHINSHIP', 'HUDCO',
+    'NBCC', 'IRFC', 'IREDA', 'DLF', 'GODREJPROP',
+    'OBEROIRLTY', 'PRESTIGE', 'SOBHA', 'SUNTECK', 'PHOENIXLTD'
+]
+
+# ---- High Liquidity Midcaps (Additional) ----
+HIGH_LIQUIDITY_MIDCAPS = [
+    'MINDTREE', 'LTIM', 'TECHM', 'WIPRO', 'MPHASIS',
+    'PERSISTENT', 'CYIENT', 'COFORGE', 'KPITTECH', 'ZENSARTECH',
+    'BIRLASOFT', 'LTI', 'NIITTECH', 'JBCHEPHARM', 'ALKEM',
+    'TORNTPHARM', 'GLENMARK', 'BIOCON', 'AUROPHARMA', 'IPCA',
+    'CADILAHC', 'SANOFI', 'GSK', 'MOTHERSON', 'BOSCH',
+    'MINDACORP', 'ZF', 'SAMVRIDDHI', 'ASK', 'AISL',
+    'SMLISUZU', 'ACC', 'AMBUJACEM', 'SHREECEM', 'RAMCOCEM',
+    'HEIDELBERG', 'KCP', 'JKLAKSHMI', 'NCLIND', 'SAIL',
+    'MOIL', 'KIOCL', 'ORIENTALRL', 'SUNFLAG', 'JAYASWAL',
+    'MANALIPETC', 'RAJESHEXPO', 'HINDCOPPER', 'TATACHEM', 'DEEPAKNTR',
+    'SRF', 'AARTIIND', 'PIIND', 'NAVINFLUOR', 'SOLARINDS',
+    'ATUL', 'TATASTL', 'BHARTIARTL', 'JIO', 'IDEA',
+    'GTLINFRA', 'TATACOMM', 'PFC', 'RECLTD', 'BANKBARODA',
+    'CANBK', 'PNB', 'UCOBANK', 'IDFCFIRSTB', 'BANDHANBNK',
+    'RBLBANK', 'YESBANK'
+]
+
+# ---- Combined Full List (for complete scan) ----
+FULL_SCAN_STOCKS = list(set(
+    NIFTY_50 + NIFTY_NEXT_50 + NIFTY_MIDCAP_100 + HIGH_LIQUIDITY_MIDCAPS
+))  # ~280 unique stocks
+
+# ---- Quick Scan (Nifty 50 only) ----
+QUICK_SCAN_STOCKS = NIFTY_50
+
+# ---- Default: set which scan mode to use via environment or argument ----
+# This will be overridden by command-line arguments in main.py
+DEFAULT_SCAN_MODE = 'full'  # 'full' or 'quick'
