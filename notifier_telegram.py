@@ -4,15 +4,15 @@ import os
 from config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 
 def send_telegram_alert(message):
-    if TELEGRAM_BOT_TOKEN == 'YOUR_BOT_TOKEN':
+    if TELEGRAM_BOT_TOKEN == '8944262472:AAF8IOk8si-_hMNxvRs588evNZWe1gEwQ_o':
         print("\n" + "="*50)
         print("📢 TELEGRAM ALERT (Token not set):")
         print(message)
         print("="*50 + "\n")
         return
-    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    url = f"https://api.telegram.org/bot8944262472:AAF8IOk8si-_hMNxvRs588evNZWe1gEwQ_o/sendMessage"
     payload = {
-        "chat_id": TELEGRAM_CHAT_ID,
+        "chat_id": 1715733436,
         "text": message,
         "parse_mode": "Markdown"
     }
