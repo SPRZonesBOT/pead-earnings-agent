@@ -10,7 +10,7 @@ sys.path.append(os.path.dirname(__file__))
 
 from announcements.nse_watcher import NSEWatcher
 from announcements.bse_watcher import BSEWatcher
-from announcements.screener_watcher import ScreenerWatcher   # New API-based
+from announcements.screener_watcher import ScreenerWatcher
 from database.db_manager import AnnouncementDB
 from notifier_telegram import send_telegram_alert
 
@@ -44,39 +44,40 @@ def save_processed_id(filing_id):
 # Mock Financials (fallback)
 # -------------------------------------------------------------------
 def get_mock_financials(symbol):
-    """Return mock financials for testing when no real data available"""
+    """
+    Return mock financials for testing when no real data available.
+    Also includes mock growth values.
+    """
     mock_data = {
-        'RELIANCE':    {'revenue': 250000, 'pat': 20000, 'ebitda': 35000, 'eps': 45, 'ebitda_margin': 14.0, 'pat_margin': 8.0},
-        'TCS':         {'revenue': 60000,  'pat': 12000, 'ebitda': 15000, 'eps': 35, 'ebitda_margin': 25.0, 'pat_margin': 20.0},
-        'HDFCBANK':    {'revenue': 45000,  'pat': 15000, 'ebitda': 20000, 'eps': 28, 'ebitda_margin': 44.0, 'pat_margin': 33.0},
-        'INFY':        {'revenue': 40000,  'pat': 8000,  'ebitda': 10000, 'eps': 22, 'ebitda_margin': 25.0, 'pat_margin': 20.0},
-        'HINDUNILVR':  {'revenue': 15000,  'pat': 3000,  'ebitda': 4000,  'eps': 15, 'ebitda_margin': 27.0, 'pat_margin': 20.0},
-        'ICICIBANK':   {'revenue': 38000,  'pat': 11000, 'ebitda': 16000, 'eps': 18, 'ebitda_margin': 42.0, 'pat_margin': 29.0},
-        'SBIN':        {'revenue': 120000, 'pat': 25000, 'ebitda': 45000, 'eps': 30, 'ebitda_margin': 38.0, 'pat_margin': 21.0},
-        'KOTAKBANK':   {'revenue': 25000,  'pat': 8000,  'ebitda': 12000, 'eps': 40, 'ebitda_margin': 48.0, 'pat_margin': 32.0},
-        'LT':          {'revenue': 55000,  'pat': 5000,  'ebitda': 7000,  'eps': 38, 'ebitda_margin': 13.0, 'pat_margin': 9.0},
-        'BHARTIARTL':  {'revenue': 40000,  'pat': 6000,  'ebitda': 18000, 'eps': 12, 'ebitda_margin': 45.0, 'pat_margin': 15.0},
+        'RELIANCE':    {'revenue': 250000, 'pat': 20000, 'ebitda': 35000, 'eps': 45, 'ebitda_margin': 14.0, 'pat_margin': 8.0, 'rev_growth': 8.5, 'pat_growth': 6.2},
+        'TCS':         {'revenue': 60000,  'pat': 12000, 'ebitda': 15000, 'eps': 35, 'ebitda_margin': 25.0, 'pat_margin': 20.0, 'rev_growth': 16.2, 'pat_growth': 19.8},
+        'HDFCBANK':    {'revenue': 45000,  'pat': 15000, 'ebitda': 20000, 'eps': 28, 'ebitda_margin': 44.0, 'pat_margin': 33.0, 'rev_growth': 13.5, 'pat_growth': 15.0},
+        'INFY':        {'revenue': 40000,  'pat': 8000,  'ebitda': 10000, 'eps': 22, 'ebitda_margin': 25.0, 'pat_margin': 20.0, 'rev_growth': 12.0, 'pat_growth': 14.0},
+        'HINDUNILVR':  {'revenue': 15000,  'pat': 3000,  'ebitda': 4000,  'eps': 15, 'ebitda_margin': 27.0, 'pat_margin': 20.0, 'rev_growth': 5.0, 'pat_growth': 7.0},
+        'ICICIBANK':   {'revenue': 38000,  'pat': 11000, 'ebitda': 16000, 'eps': 18, 'ebitda_margin': 42.0, 'pat_margin': 29.0, 'rev_growth': 14.0, 'pat_growth': 16.5},
+        'SBIN':        {'revenue': 120000, 'pat': 25000, 'ebitda': 45000, 'eps': 30, 'ebitda_margin': 38.0, 'pat_margin': 21.0, 'rev_growth': 9.0, 'pat_growth': 11.0},
+        'KOTAKBANK':   {'revenue': 25000,  'pat': 8000,  'ebitda': 12000, 'eps': 40, 'ebitda_margin': 48.0, 'pat_margin': 32.0, 'rev_growth': 18.0, 'pat_growth': 20.0},
+        'LT':          {'revenue': 55000,  'pat': 5000,  'ebitda': 7000,  'eps': 38, 'ebitda_margin': 13.0, 'pat_margin': 9.0, 'rev_growth': 4.0, 'pat_growth': 2.0},
+        'BHARTIARTL':  {'revenue': 40000,  'pat': 6000,  'ebitda': 18000, 'eps': 12, 'ebitda_margin': 45.0, 'pat_margin': 15.0, 'rev_growth': 22.0, 'pat_growth': 25.0},
     }
-    return mock_data.get(symbol, {'revenue': 5000, 'pat': 500, 'ebitda': 800, 'eps': 10, 'ebitda_margin': 16.0, 'pat_margin': 10.0})
+    return mock_data.get(symbol, {
+        'revenue': 5000, 'pat': 500, 'ebitda': 800, 'eps': 10,
+        'ebitda_margin': 16.0, 'pat_margin': 10.0,
+        'rev_growth': 12.0, 'pat_growth': 15.0
+    })
 
 # -------------------------------------------------------------------
-# PEAD Scoring Engine (Enhanced)
+# PEAD Scoring Engine (Uses real growth values)
 # -------------------------------------------------------------------
-def calculate_pead_score(fin, prev_fin=None):
+def calculate_pead_score(fin, rev_growth=0, pat_growth=0, prev_fin=None):
     """
-    Enhanced PEAD score (0-100)
-    Uses revenue growth, PAT growth, margins, EPS, and quality checks.
+    Enhanced PEAD score (0-100) using revenue growth, PAT growth, margins, EPS, and margin expansion.
     """
     score = 0
     details = {}
 
-    # 1. Revenue Growth (YoY or QoQ) – Max 25 points
-    if prev_fin and prev_fin.get('revenue', 0) > 0:
-        rev_growth = ((fin['revenue'] - prev_fin['revenue']) / prev_fin['revenue']) * 100
-    else:
-        rev_growth = 12  # default assumption
+    # 1. Revenue Growth – Max 25 points
     details['rev_growth'] = round(rev_growth, 1)
-
     if rev_growth > 20:
         score += 25
     elif rev_growth > 12:
@@ -87,12 +88,7 @@ def calculate_pead_score(fin, prev_fin=None):
         score += 3
 
     # 2. PAT Growth – Max 20 points
-    if prev_fin and prev_fin.get('pat', 0) > 0:
-        pat_growth = ((fin['pat'] - prev_fin['pat']) / prev_fin['pat']) * 100
-    else:
-        pat_growth = 15
     details['pat_growth'] = round(pat_growth, 1)
-
     if pat_growth > 25:
         score += 20
     elif pat_growth > 15:
@@ -138,7 +134,7 @@ def calculate_pead_score(fin, prev_fin=None):
     else:
         score += 2
 
-    # 6. Quality Check: Margin expansion/contraction – Max 10 points
+    # 6. Margin Expansion (if we have previous data) – Max 10 points
     if prev_fin and prev_fin.get('ebitda_margin', 0) > 0:
         margin_change = ebitda_margin - prev_fin.get('ebitda_margin', 0)
         if margin_change > 2:
@@ -148,7 +144,7 @@ def calculate_pead_score(fin, prev_fin=None):
         else:
             score += 0
     else:
-        score += 5  # no prior data, neutral
+        score += 5  # neutral if no historical data
 
     # Cap at 100
     score = min(score, 100)
@@ -252,19 +248,23 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False):
         print(f"📈 Processing {symbol}...")
         fin = None
         prev_fin = None
+        rev_growth = 0
+        pat_growth = 0
 
         # A. If data is from Screener, financials already in dict
         if 'financials' in ann and ann['financials']:
             fin = ann['financials']
             print(f"   📊 Using Screener financials for {symbol}")
-            # Debug: print extracted values
+            # Extract growth from Screener data
+            rev_growth = fin.get('rev_growth', 0)
+            pat_growth = fin.get('pat_growth', 0)
             print(f"      Revenue: {fin.get('revenue',0):,.0f}, PAT: {fin.get('pat',0):,.0f}, EBITDA Margin: {fin.get('ebitda_margin',0):.1f}%, PAT Margin: {fin.get('pat_margin',0):.1f}%")
+            print(f"      Growth: Revenue {rev_growth:.1f}%, PAT {pat_growth:.1f}%")
 
         # B. Else try PDF download & parse
         elif ann.get('pdf_url'):
             pdf_path = None
             try:
-                # Try downloading with NSE or BSE watcher (whichever has download method)
                 if hasattr(NSEWatcher, 'download_pdf'):
                     watcher = NSEWatcher()
                 else:
@@ -275,7 +275,7 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False):
                     extractor = FinancialExtractor(pdf_path)
                     fin = extractor.extract_standalone_numbers()
                     if fin and fin.get('revenue', 0) == 0:
-                        fin = None  # invalid extraction
+                        fin = None
             except Exception as e:
                 print(f"   ⚠️ PDF processing error: {e}")
             finally:
@@ -285,16 +285,19 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False):
         # C. If still no financials, use mock
         if not fin:
             fin = get_mock_financials(symbol)
+            rev_growth = fin.get('rev_growth', 12.0)   # default
+            pat_growth = fin.get('pat_growth', 15.0)
             print(f"   📊 Using mock financials for {symbol}")
             print(f"      Revenue: {fin.get('revenue',0):,.0f}, PAT: {fin.get('pat',0):,.0f}, EBITDA Margin: {fin.get('ebitda_margin',0):.1f}%, PAT Margin: {fin.get('pat_margin',0):.1f}%")
+            print(f"      Growth: Revenue {rev_growth:.1f}%, PAT {pat_growth:.1f}%")
 
-        # Get historical data for comparison
+        # Get historical data for margin expansion (if any)
         hist_df = db.get_history(symbol)
         if not hist_df.empty:
             prev_fin = hist_df.iloc[0].to_dict()
 
-        # Calculate PEAD score
-        score_data = calculate_pead_score(fin, prev_fin)
+        # Calculate PEAD score using real growth values
+        score_data = calculate_pead_score(fin, rev_growth, pat_growth, prev_fin)
         score = score_data['total_score']
 
         # Apply liquidity penalty (if data available)
