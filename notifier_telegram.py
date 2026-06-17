@@ -1,42 +1,26 @@
 # notifier_telegram.py
 import requests
 import os
+from config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 
-def send_telegram_alert(message, subject=None, source=None, ann_datetime=None):
-    """
-    Flexible function:
-    - Agar sirf message diya toh woh use hoga
-    - Agar saare arguments diye toh formatted message banta hai
-    """
-    # Agar subject, source, ann_datetime diye hain toh formatted message banao
-    if subject and source and ann_datetime:
-        full_message = f"*{subject}*\nSource: {source}\nTime: {ann_datetime}\n\n{message}"
-    else:
-        full_message = message
-
-    bot_token = os.getenv("TELEGRAM_BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
-    chat_id = os.getenv("TELEGRAM_CHAT_ID", "YOUR_CHAT_ID_HERE")
-    
-    # Agar token set nahi hai toh local print karo
-    if bot_token == "YOUR_BOT_TOKEN_HERE":
+def send_telegram_alert(message):
+    if TELEGRAM_BOT_TOKEN == 'YOUR_BOT_TOKEN':
         print("\n" + "="*50)
-        print("📢 TELEGRAM ALERT (Printed locally - Token not set):")
-        print(full_message)
+        print("📢 TELEGRAM ALERT (Token not set):")
+        print(message)
         print("="*50 + "\n")
         return
-        
-    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {
-        "chat_id": chat_id,
-        "text": full_message,
+        "chat_id": TELEGRAM_CHAT_ID,
+        "text": message,
         "parse_mode": "Markdown"
     }
-    
     try:
         response = requests.post(url, json=payload, timeout=10)
         if response.status_code == 200:
-            print("✅ Telegram alert sent successfully!")
+            print("✅ Telegram alert sent!")
         else:
             print(f"❌ Telegram error: {response.text}")
     except Exception as e:
-        print(f"❌ Failed to send Telegram message: {e}")
+        print(f"❌ Failed: {e}")
