@@ -12,12 +12,12 @@ sys.path.append(os.path.dirname(__file__))
 from announcements.nse_watcher import NSEWatcher
 from announcements.bse_watcher import BSEWatcher
 from announcements.screener_watcher import ScreenerWatcher
-from announcements.price_fetcher import PriceFetcher  # New for price confirmation
+from announcements.price_fetcher import PriceFetcher
 from database.db_manager import AnnouncementDB
 from notifier_telegram import send_telegram_alert
-import config  # Centralized configuration
+import config
 
-# State file to avoid duplicate alerts
+# State file
 STATE_FILE = "state.json"
 
 # -------------------------------------------------------------------
@@ -47,10 +47,7 @@ def save_processed_id(filing_id):
 # Mock Financials (fallback)
 # -------------------------------------------------------------------
 def get_mock_financials(symbol):
-    """
-    Return mock financials for testing when no real data available.
-    Also includes mock growth values (QoQ and YoY).
-    """
+    """Return mock financials with growth values."""
     mock_data = {
         'RELIANCE': {
             'revenue': 250000, 'pat': 20000, 'ebitda': 35000, 'eps': 45,
@@ -122,26 +119,26 @@ def get_mock_financials(symbol):
     return mock_data.get(symbol, default)
 
 # -------------------------------------------------------------------
-# Enhanced PEAD Scoring Engine (Uses QoQ, YoY, Price Return)
+# Enhanced PEAD Scoring Engine
 # -------------------------------------------------------------------
 def calculate_pead_score(fin, qoq_rev=0, qoq_pat=0, yoy_rev=0, yoy_pat=0,
                          price_return=0, prev_fin=None):
     """
-    Enhanced PEAD score (0-100) using:
-    - Revenue Growth: average of QoQ and YoY (max 20 pts)
-    - PAT Growth: average of QoQ and YoY (max 20 pts)
-    - EBITDA Margin: (max 15 pts)
-    - PAT Margin: (max 15 pts)
-    - EPS: (max 10 pts)
-    - Margin Expansion: (max 10 pts)
-    - Price Confirmation: (max 10 pts)
+    Enhanced PEAD score (0-100) using QoQ, YoY, margins, EPS, margin expansion, price return.
+    Weights:
+    - Revenue Growth (QoQ+YoY weighted) : 20 pts
+    - PAT Growth (QoQ+YoY weighted)    : 20 pts
+    - EBITDA Margin                     : 15 pts
+    - PAT Margin                        : 15 pts
+    - EPS                               : 10 pts
+    - Margin Expansion                  : 10 pts
+    - Price Confirmation                : 10 pts
     Total = 100
     """
     score = 0
     details = {}
 
-    # ---- 1. Revenue Growth (QoQ + YoY average) - 20 pts ----
-    # Use weighted average: give more weight to QoQ (recent momentum)
+    # ---- 1. Revenue Growth (weighted avg of QoQ and YoY) - 20 pts ----
     if qoq_rev and yoy_rev:
         rev_growth = (0.7 * qoq_rev) + (0.3 * yoy_rev)
     else:
@@ -156,7 +153,7 @@ def calculate_pead_score(fin, qoq_rev=0, qoq_pat=0, yoy_rev=0, yoy_pat=0,
     else:
         score += 2
 
-    # ---- 2. PAT Growth (QoQ + YoY average) - 20 pts ----
+    # ---- 2. PAT Growth (weighted avg) - 20 pts ----
     if qoq_pat and yoy_pat:
         pat_growth = (0.7 * qoq_pat) + (0.3 * yoy_pat)
     else:
@@ -217,9 +214,9 @@ def calculate_pead_score(fin, qoq_rev=0, qoq_pat=0, yoy_rev=0, yoy_pat=0,
         else:
             score += 0
     else:
-        score += 5  # neutral if no historical data
+        score += 5  # neutral if no prior
 
-    # ---- 7. Price Confirmation - 10 pts ----
+    # ---- 7. Price Return - 10 pts ----
     details['price_return'] = round(price_return, 1)
     if price_return > 3:
         score += 10
@@ -228,7 +225,6 @@ def calculate_pead_score(fin, qoq_rev=0, qoq_pat=0, yoy_rev=0, yoy_pat=0,
     else:
         score += 0
 
-    # Cap at 100
     score = min(score, 100)
     details['total_score'] = score
     return details
@@ -236,14 +232,14 @@ def calculate_pead_score(fin, qoq_rev=0, qoq_pat=0, yoy_rev=0, yoy_pat=0,
 # -------------------------------------------------------------------
 # Main Orchestrator
 # -------------------------------------------------------------------
-def run_pead_cycle(force_mock=False, reset=False, no_real=False):
+def run_pead_cycle(force_mock=False, reset=False, no_real=False, scan_mode='full'):
     if reset:
         reset_state()
 
     db = AnnouncementDB()
     processed_ids = get_processed_ids()
 
-    print(f"\n🚀 Starting PEAD Agent...")
+    print(f"\n🚀 Starting PEAD Agent (Scan: {scan_mode.upper()})...")
     print(f"🕒 {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("-" * 50)
 
@@ -251,13 +247,11 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False):
 
     # ---------- Real Data Fetching ----------
     if not no_real and not force_mock:
-        # 1. Try Screener.in (most reliable)
-        print("📡 Attempting Screener.in API...")
+        print(f"📡 Attempting Screener.in API with {scan_mode} scan...")
         try:
             screener = ScreenerWatcher()
-            # Use stock list from config if defined, else default
-            stocks = config.STOCKS_LIST if hasattr(config, 'STOCKS_LIST') else None
-            announcements = screener.get_financial_results(stocks_list=stocks)
+            # Pass scan_mode string; watcher will map to list
+            announcements = screener.get_financial_results(stocks_list=scan_mode)
             if announcements:
                 print(f"✅ Found {len(announcements)} stocks via Screener.in.")
             else:
@@ -293,11 +287,10 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False):
     else:
         force_mock = True
 
-    # ---------- Mock Data (if requested or no real data) ----------
+    # ---------- Mock Data ----------
     if force_mock:
-        print("📊 Using MOCK data for testing (no real announcements fetched).")
-        mock_symbols = ['RELIANCE', 'TCS', 'HDFCBANK', 'INFY', 'HINDUNILVR',
-                        'ICICIBANK', 'SBIN', 'KOTAKBANK', 'LT', 'BHARTIARTL']
+        print("📊 Using MOCK data for testing.")
+        mock_symbols = config.NIFTY_50[:10]  # just 10 for speed
         announcements = []
         for sym in mock_symbols:
             announcements.append({
@@ -312,12 +305,12 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False):
                 'subject': 'Mock Financial Results'
             })
 
-    # ---------- Process Each Announcement ----------
+    # ---------- Process ----------
     candidates = []
     processed_count = 0
     skipped_count = 0
 
-    # Initialize price fetcher (if enabled)
+    # Price fetcher
     price_fetcher = None
     if config.ENABLE_PRICE_FETCH:
         price_fetcher = PriceFetcher()
@@ -337,19 +330,17 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False):
         fin = None
         prev_fin = None
 
-        # A. If data is from Screener, financials already in dict
+        # A. From Screener
         if 'financials' in ann and ann['financials']:
             fin = ann['financials']
-            print(f"   📊 Using Screener financials for {symbol}")
-            # Extract growth values from fin
             qoq_rev = fin.get('qoq_rev_growth', 0)
             qoq_pat = fin.get('qoq_pat_growth', 0)
             yoy_rev = fin.get('yoy_rev_growth', 0)
             yoy_pat = fin.get('yoy_pat_growth', 0)
-            print(f"      Revenue: {fin.get('revenue',0):,.0f}, PAT: {fin.get('pat',0):,.0f}, EBITDA Margin: {fin.get('ebitda_margin',0):.1f}%, PAT Margin: {fin.get('pat_margin',0):.1f}%")
+            print(f"   📊 Screener data: Rev {fin.get('revenue',0):,.0f}, PAT {fin.get('pat',0):,.0f}, Margins EBT {fin.get('ebitda_margin',0):.1f}% PAT {fin.get('pat_margin',0):.1f}%")
             print(f"      Growth: QoQ Rev {qoq_rev:.1f}%, QoQ PAT {qoq_pat:.1f}%, YoY Rev {yoy_rev:.1f}%, YoY PAT {yoy_pat:.1f}%")
 
-        # B. Else try PDF download & parse
+        # B. PDF parse (if any)
         elif ann.get('pdf_url'):
             pdf_path = None
             try:
@@ -370,7 +361,7 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False):
                 if pdf_path and os.path.exists(pdf_path):
                     os.remove(pdf_path)
 
-        # C. If still no financials, use mock
+        # C. Mock fallback
         if not fin:
             fin = get_mock_financials(symbol)
             qoq_rev = fin.get('qoq_rev_growth', 12.0)
@@ -381,12 +372,12 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False):
             print(f"      Revenue: {fin.get('revenue',0):,.0f}, PAT: {fin.get('pat',0):,.0f}, EBITDA Margin: {fin.get('ebitda_margin',0):.1f}%, PAT Margin: {fin.get('pat_margin',0):.1f}%")
             print(f"      Growth: QoQ Rev {qoq_rev:.1f}%, QoQ PAT {qoq_pat:.1f}%, YoY Rev {yoy_rev:.1f}%, YoY PAT {yoy_pat:.1f}%")
 
-        # Get historical data for margin expansion (if any)
+        # Historical data for margin expansion (from DB)
         hist_df = db.get_history(symbol)
         if not hist_df.empty:
             prev_fin = hist_df.iloc[0].to_dict()
 
-        # ---------- Price Confirmation ----------
+        # Price confirmation
         price_return = 0
         if config.ENABLE_PRICE_FETCH and price_fetcher and ann.get('date'):
             try:
@@ -397,7 +388,7 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False):
             except Exception as e:
                 print(f"      ⚠️ Price fetch failed: {e}")
 
-        # ---------- Calculate PEAD Score ----------
+        # Calculate score
         score_data = calculate_pead_score(
             fin=fin,
             qoq_rev=qoq_rev,
@@ -409,19 +400,16 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False):
         )
         score = score_data['total_score']
 
-        # Apply liquidity penalty (if data available)
+        # Liquidity penalty
         liquidity = db.get_liquidity(symbol)
-        min_liquidity = config.MIN_LIQUIDITY if hasattr(config, 'MIN_LIQUIDITY') else 5_00_00_000
-        if liquidity < min_liquidity and liquidity > 0:
+        if liquidity < config.MIN_LIQUIDITY and liquidity > 0:
             print(f"   ⚠️ Low liquidity ({liquidity/1e7:.1f} Cr) - penalty -5")
             score = max(score - 5, 0)
 
-        # Determine action
-        buy_threshold = config.BUY_THRESHOLD if hasattr(config, 'BUY_THRESHOLD') else 70
-        watch_threshold = config.WATCH_THRESHOLD if hasattr(config, 'WATCH_THRESHOLD') else 50
-        if score >= buy_threshold:
+        # Action
+        if score >= config.BUY_THRESHOLD:
             action = "🔴 BUY"
-        elif score >= watch_threshold:
+        elif score >= config.WATCH_THRESHOLD:
             action = "🟡 WATCH"
         else:
             action = "🟢 AVOID"
@@ -446,14 +434,12 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False):
     print("-" * 50)
     print(f"📊 Summary: {processed_count} processed, {skipped_count} skipped.")
 
-    # ---------- Top 10 Ranking ----------
+    # Top 10
     top_10 = sorted(candidates, key=lambda x: x['score'], reverse=True)[:10]
 
-    # ---------- Send Alert ----------
     if top_10:
         msg = f"📈 *TOP {len(top_10)} PEAD PICKS - THIS QUARTER*\n"
         msg += f"🕒 {datetime.now().strftime('%d-%b %I:%M %p')}\n\n"
-
         for i, stock in enumerate(top_10, 1):
             msg += f"{i}. *{stock['company']}* ({stock['symbol']})\n"
             msg += f"   📊 Score: {stock['score']} | {stock['action']}\n"
@@ -464,7 +450,6 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False):
             if stock.get('date'):
                 msg += f"   📅 {stock['date']}\n"
             msg += "\n"
-
         send_telegram_alert(msg)
         print("\n" + "="*50)
         print("📢 ALERT:")
@@ -480,12 +465,15 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False):
 # -------------------------------------------------------------------
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='PEAD Earnings Agent')
-    parser.add_argument('--reset', action='store_true', help='Reset state (process all stocks again)')
-    parser.add_argument('--force-mock', action='store_true', help='Force use of mock data (for testing)')
-    parser.add_argument('--no-real', action='store_true', help='Skip real data fetching, only use mock')
+    parser.add_argument('--reset', action='store_true', help='Reset state')
+    parser.add_argument('--force-mock', action='store_true', help='Force mock')
+    parser.add_argument('--no-real', action='store_true', help='Skip real data')
+    parser.add_argument('--scan-mode', choices=['quick', 'full'], default='full',
+                        help='Scan mode: quick (Nifty 50) or full (all 280 stocks)')
     args = parser.parse_args()
 
     if args.no_real:
         args.force_mock = True
 
-    run_pead_cycle(force_mock=args.force_mock, reset=args.reset, no_real=args.no_real)
+    run_pead_cycle(force_mock=args.force_mock, reset=args.reset,
+                   no_real=args.no_real, scan_mode=args.scan_mode)
