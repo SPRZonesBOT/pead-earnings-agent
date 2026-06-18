@@ -47,74 +47,85 @@ def save_processed_id(filing_id):
 # Mock Financials (fallback)
 # -------------------------------------------------------------------
 def get_mock_financials(symbol):
-    """Return mock financials with growth values."""
+    """Return mock financials with growth values and mock CMP."""
     mock_data = {
         'RELIANCE': {
             'revenue': 250000, 'pat': 20000, 'ebitda': 35000, 'eps': 45,
             'ebitda_margin': 14.0, 'pat_margin': 8.0,
             'qoq_rev_growth': 8.5, 'qoq_pat_growth': 6.2,
-            'yoy_rev_growth': 10.0, 'yoy_pat_growth': 8.5
+            'yoy_rev_growth': 10.0, 'yoy_pat_growth': 8.5,
+            'current_price': 1329.00
         },
         'TCS': {
             'revenue': 60000, 'pat': 12000, 'ebitda': 15000, 'eps': 35,
             'ebitda_margin': 25.0, 'pat_margin': 20.0,
             'qoq_rev_growth': 16.2, 'qoq_pat_growth': 19.8,
-            'yoy_rev_growth': 14.0, 'yoy_pat_growth': 18.0
+            'yoy_rev_growth': 14.0, 'yoy_pat_growth': 18.0,
+            'current_price': 4200.50
         },
         'HDFCBANK': {
             'revenue': 45000, 'pat': 15000, 'ebitda': 20000, 'eps': 28,
             'ebitda_margin': 44.0, 'pat_margin': 33.0,
             'qoq_rev_growth': 13.5, 'qoq_pat_growth': 15.0,
-            'yoy_rev_growth': 12.0, 'yoy_pat_growth': 14.0
+            'yoy_rev_growth': 12.0, 'yoy_pat_growth': 14.0,
+            'current_price': 1650.25
         },
         'INFY': {
             'revenue': 40000, 'pat': 8000, 'ebitda': 10000, 'eps': 22,
             'ebitda_margin': 25.0, 'pat_margin': 20.0,
             'qoq_rev_growth': 12.0, 'qoq_pat_growth': 14.0,
-            'yoy_rev_growth': 10.0, 'yoy_pat_growth': 12.0
+            'yoy_rev_growth': 10.0, 'yoy_pat_growth': 12.0,
+            'current_price': 1550.00
         },
         'HINDUNILVR': {
             'revenue': 15000, 'pat': 3000, 'ebitda': 4000, 'eps': 15,
             'ebitda_margin': 27.0, 'pat_margin': 20.0,
             'qoq_rev_growth': 5.0, 'qoq_pat_growth': 7.0,
-            'yoy_rev_growth': 4.0, 'yoy_pat_growth': 6.0
+            'yoy_rev_growth': 4.0, 'yoy_pat_growth': 6.0,
+            'current_price': 2450.00
         },
         'ICICIBANK': {
             'revenue': 38000, 'pat': 11000, 'ebitda': 16000, 'eps': 18,
             'ebitda_margin': 42.0, 'pat_margin': 29.0,
             'qoq_rev_growth': 14.0, 'qoq_pat_growth': 16.5,
-            'yoy_rev_growth': 12.0, 'yoy_pat_growth': 15.0
+            'yoy_rev_growth': 12.0, 'yoy_pat_growth': 15.0,
+            'current_price': 1250.00
         },
         'SBIN': {
             'revenue': 120000, 'pat': 25000, 'ebitda': 45000, 'eps': 30,
             'ebitda_margin': 38.0, 'pat_margin': 21.0,
             'qoq_rev_growth': 9.0, 'qoq_pat_growth': 11.0,
-            'yoy_rev_growth': 8.0, 'yoy_pat_growth': 10.0
+            'yoy_rev_growth': 8.0, 'yoy_pat_growth': 10.0,
+            'current_price': 850.00
         },
         'KOTAKBANK': {
             'revenue': 25000, 'pat': 8000, 'ebitda': 12000, 'eps': 40,
             'ebitda_margin': 48.0, 'pat_margin': 32.0,
             'qoq_rev_growth': 18.0, 'qoq_pat_growth': 20.0,
-            'yoy_rev_growth': 16.0, 'yoy_pat_growth': 18.0
+            'yoy_rev_growth': 16.0, 'yoy_pat_growth': 18.0,
+            'current_price': 1950.00
         },
         'LT': {
             'revenue': 55000, 'pat': 5000, 'ebitda': 7000, 'eps': 38,
             'ebitda_margin': 13.0, 'pat_margin': 9.0,
             'qoq_rev_growth': 4.0, 'qoq_pat_growth': 2.0,
-            'yoy_rev_growth': 3.0, 'yoy_pat_growth': 1.0
+            'yoy_rev_growth': 3.0, 'yoy_pat_growth': 1.0,
+            'current_price': 2800.00
         },
         'BHARTIARTL': {
             'revenue': 40000, 'pat': 6000, 'ebitda': 18000, 'eps': 12,
             'ebitda_margin': 45.0, 'pat_margin': 15.0,
             'qoq_rev_growth': 22.0, 'qoq_pat_growth': 25.0,
-            'yoy_rev_growth': 20.0, 'yoy_pat_growth': 22.0
+            'yoy_rev_growth': 20.0, 'yoy_pat_growth': 22.0,
+            'current_price': 1400.00
         },
     }
     default = {
         'revenue': 5000, 'pat': 500, 'ebitda': 800, 'eps': 10,
         'ebitda_margin': 16.0, 'pat_margin': 10.0,
         'qoq_rev_growth': 12.0, 'qoq_pat_growth': 15.0,
-        'yoy_rev_growth': 10.0, 'yoy_pat_growth': 12.0
+        'yoy_rev_growth': 10.0, 'yoy_pat_growth': 12.0,
+        'current_price': 1000.00
     }
     return mock_data.get(symbol, default)
 
@@ -250,7 +261,6 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False, scan_mode='full
         print(f"📡 Attempting Screener.in API with {scan_mode} scan...")
         try:
             screener = ScreenerWatcher()
-            # Pass scan_mode string; watcher will map to list
             announcements = screener.get_financial_results(stocks_list=scan_mode)
             if announcements:
                 print(f"✅ Found {len(announcements)} stocks via Screener.in.")
@@ -337,8 +347,11 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False, scan_mode='full
             qoq_pat = fin.get('qoq_pat_growth', 0)
             yoy_rev = fin.get('yoy_rev_growth', 0)
             yoy_pat = fin.get('yoy_pat_growth', 0)
+            cmp = fin.get('current_price', 0)
             print(f"   📊 Screener data: Rev {fin.get('revenue',0):,.0f}, PAT {fin.get('pat',0):,.0f}, Margins EBT {fin.get('ebitda_margin',0):.1f}% PAT {fin.get('pat_margin',0):.1f}%")
             print(f"      Growth: QoQ Rev {qoq_rev:.1f}%, QoQ PAT {qoq_pat:.1f}%, YoY Rev {yoy_rev:.1f}%, YoY PAT {yoy_pat:.1f}%")
+            if cmp > 0:
+                print(f"      CMP: ₹{cmp:,.2f}")
 
         # B. PDF parse (if any)
         elif ann.get('pdf_url'):
@@ -368,9 +381,12 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False, scan_mode='full
             qoq_pat = fin.get('qoq_pat_growth', 15.0)
             yoy_rev = fin.get('yoy_rev_growth', 10.0)
             yoy_pat = fin.get('yoy_pat_growth', 12.0)
+            cmp = fin.get('current_price', 0)
             print(f"   📊 Using mock financials for {symbol}")
             print(f"      Revenue: {fin.get('revenue',0):,.0f}, PAT: {fin.get('pat',0):,.0f}, EBITDA Margin: {fin.get('ebitda_margin',0):.1f}%, PAT Margin: {fin.get('pat_margin',0):.1f}%")
             print(f"      Growth: QoQ Rev {qoq_rev:.1f}%, QoQ PAT {qoq_pat:.1f}%, YoY Rev {yoy_rev:.1f}%, YoY PAT {yoy_pat:.1f}%")
+            if cmp > 0:
+                print(f"      CMP: ₹{cmp:,.2f}")
 
         # Historical data for margin expansion (from DB)
         hist_df = db.get_history(symbol)
@@ -424,6 +440,7 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False, scan_mode='full
             'ebitda_margin': score_data.get('ebitda_margin', 0),
             'pat_margin': score_data.get('pat_margin', 0),
             'price_return': score_data.get('price_return', 0),
+            'cmp': cmp,  # ✅ Current Market Price
             'date': ann.get('date', '')
         })
 
@@ -445,6 +462,9 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False, scan_mode='full
             msg += f"   📊 Score: {stock['score']} | {stock['action']}\n"
             msg += f"   📈 Rev Growth: {stock['rev_growth']}% | PAT Growth: {stock['pat_growth']}%\n"
             msg += f"   📉 EBITDA Margin: {stock['ebitda_margin']}% | PAT Margin: {stock['pat_margin']}%\n"
+            # ✅ Show CMP if available
+            if stock.get('cmp', 0) > 0:
+                msg += f"   💰 CMP: ₹{stock['cmp']:,.2f}\n"
             if stock.get('price_return') is not None:
                 msg += f"   📈 Price Return (5d): {stock['price_return']:.1f}%\n"
             if stock.get('date'):
