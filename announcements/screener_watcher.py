@@ -56,7 +56,7 @@ class ScreenerWatcher:
                     print(f"  [{count}/{len(stocks_list)}] ✅ {symbol}: Rev {data['revenue']:,.0f} (QoQ {data.get('qoq_rev_growth',0):.1f}%, PAT {data.get('pat',0):,.0f})")
                 else:
                     print(f"  [{count}/{len(stocks_list)}] ⚠️ No data for {symbol}")
-                time.sleep(1.2)  # Rate limit (keep safe)
+                time.sleep(1.2)  # Rate limit
             except Exception as e:
                 print(f"  [{count}/{len(stocks_list)}] ❌ Error {symbol}: {e}")
                 time.sleep(0.5)
@@ -71,8 +71,8 @@ class ScreenerWatcher:
         """
         Scrape quarterly data from Screener.in for the given symbol.
         Extracts current quarter (latest), previous quarter (for QoQ),
-        and YoY (same quarter last year).
-        Returns dict with revenue, pat, ebitda, margins, growths, etc.
+        YoY (same quarter last year), and CURRENT MARKET PRICE (CMP).
+        Returns dict with revenue, pat, ebitda, margins, growths, current_price, etc.
         """
         url = f"https://www.screener.in/company/{symbol}/"
         try:
@@ -89,6 +89,30 @@ class ScreenerWatcher:
             name_elem = soup.find('h1', class_='company-name')
             if name_elem:
                 data['company_name'] = name_elem.text.strip()
+
+            # ---------- Extract Current Market Price (CMP) ----------
+            data['current_price'] = 0.0
+            # Method 1: Find in the price display div
+            price_div = soup.find('div', class_='font-size-18 strong line-height-14')
+            if price_div:
+                price_span = price_div.find('span')
+                if price_span:
+                    price_text = price_span.get_text(strip=True)
+                    price_text = price_text.replace('₹', '').replace(',', '').strip()
+                    try:
+                        data['current_price'] = float(price_text)
+                    except:
+                        pass
+            # Method 2: Fallback to top ratios section
+            if data['current_price'] == 0:
+                price_elem = soup.find('span', class_='number')
+                if price_elem:
+                    price_text = price_elem.get_text(strip=True)
+                    price_text = price_text.replace('₹', '').replace(',', '').strip()
+                    try:
+                        data['current_price'] = float(price_text)
+                    except:
+                        pass
 
             # Find quarters section
             quarter_section = soup.find('section', id='quarters')
@@ -202,10 +226,13 @@ class ScreenerWatcher:
                 if data.get('pat', 0) > 0 and data['revenue'] > 0:
                     data['pat_margin'] = (data['pat'] / data['revenue']) * 100
 
+            # Print CMP for debugging (optional)
+            if data.get('current_price', 0) > 0:
+                print(f"      CMP: ₹{data['current_price']:,.2f}")
+
             return data
 
         except Exception as e:
-            # silently fail, caller will handle
             return None
 
     def _clean_number(self, text):
@@ -240,5 +267,4 @@ class ScreenerWatcher:
             return 0
 
     def download_pdf(self, pdf_url):
-        # Not implemented for Screener
         return None
