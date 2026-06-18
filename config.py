@@ -5,21 +5,16 @@ import os
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', 'YOUR_BOT_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', 'YOUR_CHAT_ID')
 
-# ---------- Price Fetching ----------
-ENABLE_PRICE_FETCH = True
+# ---------- Features ----------
+ENABLE_PRICE_FETCH = True          # fetch 5-day price return via yfinance
 
-# ---------- Scoring Thresholds ----------
+# ---------- Scoring ----------
 BUY_THRESHOLD = 70
 WATCH_THRESHOLD = 50
+MIN_LIQUIDITY = 5_00_00_000       # 5 Crore
 
-# ---------- Liquidity Filter ----------
-MIN_LIQUIDITY = 5_00_00_000  # 5 Crore
-
-# ================================================================
-# STOCK CATEGORIZATION (Based on NSE indices)
-# ================================================================
-
-# ---- Nifty 50 (Top 50) ----
+# ---------- Stock Lists ----------
+# Nifty 50
 NIFTY_50 = [
     'RELIANCE', 'TCS', 'HDFCBANK', 'INFY', 'HINDUNILVR',
     'ICICIBANK', 'SBIN', 'KOTAKBANK', 'LT', 'BHARTIARTL',
@@ -33,7 +28,7 @@ NIFTY_50 = [
     'MCDOWELL-N', 'BAJAJFINSV', 'TECHM', 'SHRIRAMFIN', 'HDFCLIFE'
 ]
 
-# ---- Nifty Next 50 (51-100) ----
+# Nifty Next 50
 NIFTY_NEXT_50 = [
     'VEDL', 'HINDZINC', 'JINDALSTEL', 'BANKBARODA', 'CANBK',
     'GODREJCP', 'HAL', 'BEL', 'SIEMENS', 'ABB',
@@ -47,7 +42,7 @@ NIFTY_NEXT_50 = [
     'TVSMOTOR', 'BALKRISIND', 'MRF', 'MUTHOOT', 'ICICIPRULI'
 ]
 
-# ---- Nifty Midcap 100 (101-200) ----
+# Nifty Midcap 100 (sample)
 NIFTY_MIDCAP_100 = [
     'ADANIENT', 'ADANIGREEN', 'GMRINFRA', 'L&T', 'SIEMENS',
     'BHEL', 'PFC', 'RECLTD', 'ADANITRANS', 'MUTHOOTFIN',
@@ -59,7 +54,6 @@ NIFTY_MIDCAP_100 = [
     'VIPIND', 'PVRINOX', 'TITAN', 'SBI', 'JUBLFOOD',
     'DOMINO', 'BIKAJI', 'NESTLEIND', 'BRITANNIA', 'HATSUN',
     'VARUNBEV', 'VBL', 'ABFRL', 'ADITYABIRLA', 'MAHINDRA',
-    # additional midcap
     'ASHOKLEY', 'ESCORTS', 'JSWENERGY', 'JSWINFRA', 'APOLLOTYRE',
     'CEATLTD', 'BANKINDIA', 'UNIONBANK', 'INDIANB', 'CENTRALBK',
     'PNB', 'UCOBANK', 'IDFCFIRSTB', 'BANDHANBNK', 'RBLBANK',
@@ -71,7 +65,6 @@ NIFTY_MIDCAP_100 = [
     'OBEROIRLTY', 'PRESTIGE', 'SOBHA', 'SUNTECK', 'PHOENIXLTD'
 ]
 
-# ---- High Liquidity Midcaps (Additional) ----
 HIGH_LIQUIDITY_MIDCAPS = [
     'MINDTREE', 'LTIM', 'TECHM', 'WIPRO', 'MPHASIS',
     'PERSISTENT', 'CYIENT', 'COFORGE', 'KPITTECH', 'ZENSARTECH',
@@ -90,14 +83,7 @@ HIGH_LIQUIDITY_MIDCAPS = [
     'RBLBANK', 'YESBANK'
 ]
 
-# ---- Combined Full List (for complete scan) ----
-FULL_SCAN_STOCKS = list(set(
-    NIFTY_50 + NIFTY_NEXT_50 + NIFTY_MIDCAP_100 + HIGH_LIQUIDITY_MIDCAPS
-))  # ~280 unique stocks
-
-# ---- Quick Scan (Nifty 50 only) ----
+FULL_SCAN_STOCKS = list(set(NIFTY_50 + NIFTY_NEXT_50 + NIFTY_MIDCAP_100 + HIGH_LIQUIDITY_MIDCAPS))
 QUICK_SCAN_STOCKS = NIFTY_50
 
-# ---- Default: set which scan mode to use via environment or argument ----
-# This will be overridden by command-line arguments in main.py
-DEFAULT_SCAN_MODE = 'full'  # 'full' or 'quick'
+DEFAULT_SCAN_MODE = 'full'   # 'quick' or 'full'
