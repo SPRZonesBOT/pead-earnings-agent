@@ -1,6 +1,10 @@
 # main.py
-import os, sys, json, argparse
+import os
+import sys
+import json
+import argparse
 from datetime import datetime
+
 sys.path.append(os.path.dirname(__file__))
 
 from announcements.screener_watcher import ScreenerWatcher
@@ -12,9 +16,11 @@ from notifier_telegram import send_telegram_alert
 from analysis.quantum_scoring import QuantumScorer
 from analysis.quantum_weight_optimizer import QuantumWeightOptimizer
 import config
+import numpy as np
 
 STATE_FILE = "state.json"
 
+# ---------- State Management ----------
 def reset_state():
     if os.path.exists(STATE_FILE):
         os.remove(STATE_FILE)
@@ -33,12 +39,61 @@ def save_processed_id(fid):
     with open(STATE_FILE, 'w') as f:
         json.dump({'processed': list(existing)}, f)
 
+# ---------- Mock Financials (fallback) ----------
 def get_mock_financials(symbol):
-    # ... (same as before, include mock ratios)
-    # For brevity, keep the existing mock function; ensure it has 'pe_ratio', 'div_yield'
-    # We'll assume it returns a dict with at least those keys.
-    return {}
+    # Include all required fields including pe_ratio, div_yield, current_price, etc.
+    mock_data = {
+        'RELIANCE': {
+            'revenue': 250000, 'pat': 20000, 'ebitda': 35000, 'eps': 45,
+            'ebitda_margin': 14.0, 'pat_margin': 8.0,
+            'qoq_rev_growth': 8.5, 'qoq_pat_growth': 6.2,
+            'yoy_rev_growth': 10.0, 'yoy_pat_growth': 8.5,
+            'current_price': 1329.00,
+            'pe_ratio': 22.5, 'div_yield': 0.8
+        },
+        'TCS': {
+            'revenue': 60000, 'pat': 12000, 'ebitda': 15000, 'eps': 35,
+            'ebitda_margin': 25.0, 'pat_margin': 20.0,
+            'qoq_rev_growth': 16.2, 'qoq_pat_growth': 19.8,
+            'yoy_rev_growth': 14.0, 'yoy_pat_growth': 18.0,
+            'current_price': 4200.50,
+            'pe_ratio': 28.0, 'div_yield': 1.2
+        },
+        # ... add other stocks as needed
+    }
+    default = {
+        'revenue': 5000, 'pat': 500, 'ebitda': 800, 'eps': 10,
+        'ebitda_margin': 16.0, 'pat_margin': 10.0,
+        'qoq_rev_growth': 12.0, 'qoq_pat_growth': 15.0,
+        'yoy_rev_growth': 10.0, 'yoy_pat_growth': 12.0,
+        'current_price': 1000.00,
+        'pe_ratio': 20.0, 'div_yield': 1.0
+    }
+    return mock_data.get(symbol, default)
 
+# ---------- Quantum Weight Optimizer Runner ----------
+def run_weight_optimizer():
+    """
+    Run the quantum‑inspired simulated annealing optimizer.
+    In production, you would load real historical features and returns from your database.
+    Here we use synthetic data for demonstration.
+    """
+    print("🔄 Preparing synthetic dataset for weight optimization...")
+    np.random.seed(42)
+    n_samples = 500
+    n_features = 8
+    # Simulate features (Z-score normalized)
+    X = np.random.randn(n_samples, n_features)
+    # Simulate forward returns correlated with first 3 features
+    y = (0.3 * X[:, 0] + 0.2 * X[:, 1] + 0.1 * X[:, 2] - 0.1 * X[:, 5] + 0.2 * np.random.randn(n_samples))
+    y = y / np.std(y)
+
+    # Instantiate optimizer and run
+    optimizer = QuantumWeightOptimizer(X, y, n_iter=3000, temp_init=100.0, cooling_rate=0.995)
+    optimized_weights = optimizer.optimize()
+    print("✅ Optimization complete. Weights saved to 'weights.json'.")
+
+# ---------- PEAD Orchestrator ----------
 def run_pead_cycle(force_mock=False, reset=False, no_real=False, scan_mode='full'):
     if reset:
         reset_state()
@@ -46,9 +101,11 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False, scan_mode='full
     processed_ids = get_processed_ids()
 
     print(f"\n🚀 PEAD Agent (Scan: {scan_mode.upper()})")
-    print(f"🕒 {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n{'-'*50}")
+    print(f"🕒 {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print("-" * 50)
 
     announcements = []
+    # Try real data
     if not no_real and not force_mock:
         print(f"📡 Screener.in ({scan_mode})...")
         try:
@@ -56,9 +113,8 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False, scan_mode='full
             announcements = screener.get_financial_results(stocks_list=scan_mode)
         except Exception as e:
             print(f"❌ Screener error: {e}")
-        if not announcements:
-            # fallback to NSE/BSE...
-            pass
+        # fallbacks (NSE/BSE) could be added here
+
     if not announcements:
         force_mock = True
 
@@ -66,13 +122,20 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False, scan_mode='full
         print("📊 Using MOCK data.")
         announcements = []
         for sym in config.NIFTY_50[:10]:
-            announcements.append({'symbol': sym, 'company': sym+' Ltd', 'id': f"MOCK_{sym}", 'date': datetime.now().strftime('%d-%b-%Y')})
+            announcements.append({
+                'symbol': sym,
+                'company': sym + ' Ltd',
+                'id': f"MOCK_{sym}",
+                'date': datetime.now().strftime('%d-%b-%Y')
+            })
 
+    # Scorer and price fetcher
     scorer = QuantumScorer(lookback=50)
     price_fetcher = PriceFetcher() if config.ENABLE_PRICE_FETCH else None
 
     candidates = []
     processed = skipped = 0
+
     for ann in announcements:
         symbol = ann.get('symbol')
         fid = ann.get('id')
@@ -80,19 +143,20 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False, scan_mode='full
             if fid in processed_ids:
                 skipped += 1
             continue
+
         print(f"📈 {symbol}...")
         fin = None
         if 'financials' in ann and ann['financials']:
             fin = ann['financials']
-        elif 'financials' not in ann:
+        else:
             fin = get_mock_financials(symbol)  # fallback
-        if not fin:
-            fin = get_mock_financials(symbol)
 
+        # Extract factors
         qoq_rev = fin.get('qoq_rev_growth', 0)
         qoq_pat = fin.get('qoq_pat_growth', 0)
         yoy_rev = fin.get('yoy_rev_growth', 0)
         yoy_pat = fin.get('yoy_pat_growth', 0)
+
         price_return = 0
         if price_fetcher and ann.get('date'):
             try:
@@ -102,19 +166,22 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False, scan_mode='full
             except:
                 pass
 
-        # History for margin expansion (optional)
+        # Historical data for margin expansion (optional)
         hist_df = db.get_history(symbol)
         prev_fin = hist_df.iloc[0].to_dict() if not hist_df.empty else None
 
+        # Score
         score_data = scorer.score(fin, qoq_rev, qoq_pat, yoy_rev, yoy_pat, price_return, prev_fin)
         score = score_data['total_score']
 
-        # liquidity penalty
+        # Liquidity penalty
         liq = db.get_liquidity(symbol)
         if liq < config.MIN_LIQUIDITY and liq > 0:
             score = max(score - 5, 0)
 
-        action = "🔴 BUY" if score >= config.BUY_THRESHOLD else "🟡 WATCH" if score >= config.WATCH_THRESHOLD else "🟢 AVOID"
+        action = ("🔴 BUY" if score >= config.BUY_THRESHOLD
+                  else "🟡 WATCH" if score >= config.WATCH_THRESHOLD
+                  else "🟢 AVOID")
 
         candidates.append({
             'symbol': symbol,
@@ -135,14 +202,15 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False, scan_mode='full
 
     print(f"Summary: {processed} processed, {skipped} skipped.")
 
+    # Top 10
     top10 = sorted(candidates, key=lambda x: x['score'], reverse=True)[:10]
     if top10:
         msg = f"📈 *TOP {len(top10)} PEAD PICKS*\n🕒 {datetime.now().strftime('%d-%b %I:%M %p')}\n\n"
         for i, s in enumerate(top10, 1):
             msg += f"{i}. *{s['company']}* ({s['symbol']})\n"
             msg += f"   📊 Score: {s['score']:.1f} | {s['action']}\n"
-            msg += f"   📈 Rev: {s['rev_growth']:.1f}% | PAT: {s['pat_growth']:.1f}%\n"
-            msg += f"   📉 EBITDA: {s['ebitda_margin']:.1f}% | PAT: {s['pat_margin']:.1f}%\n"
+            msg += f"   📈 Rev Growth: {s['rev_growth']:.1f}% | PAT Growth: {s['pat_growth']:.1f}%\n"
+            msg += f"   📉 EBITDA Margin: {s['ebitda_margin']:.1f}% | PAT Margin: {s['pat_margin']:.1f}%\n"
             if s.get('cmp', 0) > 0:
                 msg += f"   💰 CMP: ₹{s['cmp']:,.2f}\n"
             if s.get('price_return') is not None:
@@ -150,26 +218,21 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False, scan_mode='full
             msg += "\n"
         send_telegram_alert(msg)
         print("\n" + "="*50 + "\n📢 ALERT:\n" + msg + "="*50)
+    else:
+        print("ℹ️ No fresh candidates found.")
 
-def run_weight_optimizer():
-    # In a real system, you'd fetch historical features and returns from the database.
-    # For demonstration, we generate synthetic data.
-    # Replace this with actual historical data extraction.
-    print("🔄 Preparing synthetic dataset...")
-    np.random.seed(42)
-    X = np.random.randn(500, 8)
-    y = (0.3 * X[:, 0] + 0.2 * X[:, 1] + 0.1 * X[:, 2] - 0.1 * X[:, 5] + 0.2 * np.random.randn(500))
-    y = y / np.std(y)
-    optimizer = QuantumWeightOptimizer(X, y, n_iter=3000)
-    optimizer.optimize()
+    print(f"✅ Cycle complete. Total processed in state: {len(get_processed_ids())}")
 
+# ---------- Command-line ----------
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--reset', action='store_true')
-    parser.add_argument('--force-mock', action='store_true')
-    parser.add_argument('--no-real', action='store_true')
-    parser.add_argument('--scan-mode', choices=['quick','full'], default='full')
-    parser.add_argument('--optimize-weights', action='store_true')
+    parser = argparse.ArgumentParser(description='PEAD Earnings Agent')
+    parser.add_argument('--reset', action='store_true', help='Reset state')
+    parser.add_argument('--force-mock', action='store_true', help='Force mock data')
+    parser.add_argument('--no-real', action='store_true', help='Skip real data')
+    parser.add_argument('--scan-mode', choices=['quick', 'full'], default='full',
+                        help='Scan mode: quick (Nifty 50) or full (all 280 stocks)')
+    parser.add_argument('--optimize-weights', action='store_true',
+                        help='Run quantum-inspired weight optimization and exit')
     args = parser.parse_args()
 
     if args.optimize_weights:
