@@ -3,70 +3,37 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
 import logging
 from main import run_pead_cycle
-import config
 
 logging.basicConfig(level=logging.INFO)
 
 sched = BlockingScheduler()
 
-# ----- Quick Scan (Nifty 50) during market hours: 9:15 AM - 3:30 PM, every 30 min -----
-# Run at 9:15, 9:45, 10:15, ... 15:15 (3:15 PM)
+# Quick scan every 30 min during market hours (IST 9:15-15:15)
 sched.add_job(
     run_pead_cycle,
-    trigger=CronTrigger(
-        day_of_week='mon-fri',
-        hour='9-15',
-        minute='*/30'
-    ),
+    trigger=CronTrigger(day_of_week='mon-fri', hour='9-15', minute='*/30'),
     id='quick_scan',
-    replace_existing=True,
-    kwargs={
-        'reset': False,
-        'force_mock': False,
-        'no_real': False,
-        'scan_mode': 'quick'
-    }
+    kwargs={'scan_mode': 'quick', 'reset': False}
 )
 
-# ----- Full Scan (All 280 stocks) after market close: 4:30 PM daily -----
+# Full scan at 16:30 IST daily
 sched.add_job(
     run_pead_cycle,
-    trigger=CronTrigger(
-        day_of_week='mon-fri',
-        hour=16,
-        minute=30
-    ),
+    trigger=CronTrigger(day_of_week='mon-fri', hour=16, minute=30),
     id='full_scan',
-    replace_existing=True,
-    kwargs={
-        'reset': False,
-        'force_mock': False,
-        'no_real': False,
-        'scan_mode': 'full'
-    }
+    kwargs={'scan_mode': 'full', 'reset': False}
 )
 
-# Also run full scan once at market open (9:15 AM) with reset to process fresh results
+# Full scan with reset at market open (9:15)
 sched.add_job(
     run_pead_cycle,
     trigger=CronTrigger(day_of_week='mon-fri', hour=9, minute=15),
-    id='market_open_full',
-    replace_existing=True,
-    kwargs={
-        'reset': True,
-        'force_mock': False,
-        'no_real': False,
-        'scan_mode': 'full'
-    }
+    id='full_reset',
+    kwargs={'scan_mode': 'full', 'reset': True}
 )
 
-if __name__ == "__main__":
-    print("🚀 PEAD Scheduler started.")
-    print("   - Quick scan (Nifty 50) every 30 min during market hours")
-    print("   - Full scan (280 stocks) at 4:30 PM daily")
-    print("   - Full scan at market open (9:15 AM) with reset")
-    print("Press Ctrl+C to stop.")
-    try:
-        sched.start()
-    except KeyboardInterrupt:
-        print("⏹️ Scheduler stopped.")
+print("🚀 Scheduler started. Quick (30min), Full (16:30), Open Reset (9:15).")
+try:
+    sched.start()
+except KeyboardInterrupt:
+    print("Stopped.")
