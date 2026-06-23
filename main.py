@@ -4,6 +4,7 @@ import sys
 import json
 import argparse
 from datetime import datetime
+import numpy as np
 
 sys.path.append(os.path.dirname(__file__))
 
@@ -16,7 +17,6 @@ from notifier_telegram import send_telegram_alert
 from analysis.quantum_scoring import QuantumScorer
 from analysis.quantum_weight_optimizer import QuantumWeightOptimizer
 import config
-import numpy as np
 
 STATE_FILE = "state.json"
 
@@ -24,7 +24,7 @@ STATE_FILE = "state.json"
 def reset_state():
     if os.path.exists(STATE_FILE):
         os.remove(STATE_FILE)
-        print("🗑️ State reset.")
+        print("[PEAD] State reset.")
 
 def get_processed_ids():
     try:
@@ -41,7 +41,6 @@ def save_processed_id(fid):
 
 # ---------- Mock Financials (fallback) ----------
 def get_mock_financials(symbol):
-    # Include all required fields including pe_ratio, div_yield, current_price, etc.
     mock_data = {
         'RELIANCE': {
             'revenue': 250000, 'pat': 20000, 'ebitda': 35000, 'eps': 45,
@@ -59,7 +58,6 @@ def get_mock_financials(symbol):
             'current_price': 4200.50,
             'pe_ratio': 28.0, 'div_yield': 1.2
         },
-        # ... add other stocks as needed
     }
     default = {
         'revenue': 5000, 'pat': 500, 'ebitda': 800, 'eps': 10,
@@ -73,25 +71,17 @@ def get_mock_financials(symbol):
 
 # ---------- Quantum Weight Optimizer Runner ----------
 def run_weight_optimizer():
-    """
-    Run the quantum‑inspired simulated annealing optimizer.
-    In production, you would load real historical features and returns from your database.
-    Here we use synthetic data for demonstration.
-    """
-    print("🔄 Preparing synthetic dataset for weight optimization...")
+    print("[PEAD] Preparing synthetic dataset for weight optimization...")
     np.random.seed(42)
     n_samples = 500
     n_features = 8
-    # Simulate features (Z-score normalized)
     X = np.random.randn(n_samples, n_features)
-    # Simulate forward returns correlated with first 3 features
     y = (0.3 * X[:, 0] + 0.2 * X[:, 1] + 0.1 * X[:, 2] - 0.1 * X[:, 5] + 0.2 * np.random.randn(n_samples))
     y = y / np.std(y)
 
-    # Instantiate optimizer and run
     optimizer = QuantumWeightOptimizer(X, y, n_iter=3000, temp_init=100.0, cooling_rate=0.995)
     optimized_weights = optimizer.optimize()
-    print("✅ Optimization complete. Weights saved to 'weights.json'.")
+    print("[PEAD] Optimization complete. Weights saved to 'weights.json'.")
 
 # ---------- PEAD Orchestrator ----------
 def run_pead_cycle(force_mock=False, reset=False, no_real=False, scan_mode='full'):
@@ -100,26 +90,25 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False, scan_mode='full
     db = AnnouncementDB()
     processed_ids = get_processed_ids()
 
-    print(f"\n🚀 PEAD Agent (Scan: {scan_mode.upper()})")
-    print(f"🕒 {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"\n[PEAD] Agent (Scan: {scan_mode.upper()})")
+    print(f"[PEAD] {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("-" * 50)
 
     announcements = []
-    # Try real data
     if not no_real and not force_mock:
-        print(f"📡 Screener.in ({scan_mode})...")
+        print(f"[PEAD] Screener.in ({scan_mode})...")
         try:
             screener = ScreenerWatcher()
             announcements = screener.get_financial_results(stocks_list=scan_mode)
         except Exception as e:
-            print(f"❌ Screener error: {e}")
-        # fallbacks (NSE/BSE) could be added here
-
+            print(f"[PEAD] Screener error: {e}")
+        if not announcements:
+            print("[PEAD] No data from Screener, trying fallback...")
     if not announcements:
         force_mock = True
 
     if force_mock:
-        print("📊 Using MOCK data.")
+        print("[PEAD] Using MOCK data.")
         announcements = []
         for sym in config.NIFTY_50[:10]:
             announcements.append({
@@ -129,7 +118,6 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False, scan_mode='full
                 'date': datetime.now().strftime('%d-%b-%Y')
             })
 
-    # Scorer and price fetcher
     scorer = QuantumScorer(lookback=50)
     price_fetcher = PriceFetcher() if config.ENABLE_PRICE_FETCH else None
 
@@ -144,14 +132,11 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False, scan_mode='full
                 skipped += 1
             continue
 
-        print(f"📈 {symbol}...")
-        fin = None
-        if 'financials' in ann and ann['financials']:
-            fin = ann['financials']
-        else:
-            fin = get_mock_financials(symbol)  # fallback
+        print(f"[PEAD] {symbol}...")
+        fin = ann.get('financials') if 'financials' in ann else None
+        if not fin:
+            fin = get_mock_financials(symbol)
 
-        # Extract factors
         qoq_rev = fin.get('qoq_rev_growth', 0)
         qoq_pat = fin.get('qoq_pat_growth', 0)
         yoy_rev = fin.get('yoy_rev_growth', 0)
@@ -166,22 +151,17 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False, scan_mode='full
             except:
                 pass
 
-        # Historical data for margin expansion (optional)
         hist_df = db.get_history(symbol)
         prev_fin = hist_df.iloc[0].to_dict() if not hist_df.empty else None
 
-        # Score
         score_data = scorer.score(fin, qoq_rev, qoq_pat, yoy_rev, yoy_pat, price_return, prev_fin)
         score = score_data['total_score']
 
-        # Liquidity penalty
         liq = db.get_liquidity(symbol)
         if liq < config.MIN_LIQUIDITY and liq > 0:
             score = max(score - 5, 0)
 
-        action = ("🔴 BUY" if score >= config.BUY_THRESHOLD
-                  else "🟡 WATCH" if score >= config.WATCH_THRESHOLD
-                  else "🟢 AVOID")
+        action = "BUY" if score >= config.BUY_THRESHOLD else "WATCH" if score >= config.WATCH_THRESHOLD else "AVOID"
 
         candidates.append({
             'symbol': symbol,
@@ -198,30 +178,29 @@ def run_pead_cycle(force_mock=False, reset=False, no_real=False, scan_mode='full
         })
         save_processed_id(fid)
         processed += 1
-        print(f"   ✅ Score: {score:.1f} | {action}")
+        print(f"   [PEAD] Score: {score:.1f} | {action}")
 
-    print(f"Summary: {processed} processed, {skipped} skipped.")
+    print(f"[PEAD] Summary: {processed} processed, {skipped} skipped.")
 
-    # Top 10
     top10 = sorted(candidates, key=lambda x: x['score'], reverse=True)[:10]
     if top10:
-        msg = f"📈 *TOP {len(top10)} PEAD PICKS*\n🕒 {datetime.now().strftime('%d-%b %I:%M %p')}\n\n"
+        msg = f"[PEAD] TOP {len(top10)} PICKS\n{datetime.now().strftime('%d-%b %I:%M %p')}\n\n"
         for i, s in enumerate(top10, 1):
-            msg += f"{i}. *{s['company']}* ({s['symbol']})\n"
-            msg += f"   📊 Score: {s['score']:.1f} | {s['action']}\n"
-            msg += f"   📈 Rev Growth: {s['rev_growth']:.1f}% | PAT Growth: {s['pat_growth']:.1f}%\n"
-            msg += f"   📉 EBITDA Margin: {s['ebitda_margin']:.1f}% | PAT Margin: {s['pat_margin']:.1f}%\n"
+            msg += f"{i}. {s['company']} ({s['symbol']})\n"
+            msg += f"   Score: {s['score']:.1f} | {s['action']}\n"
+            msg += f"   Rev Growth: {s['rev_growth']:.1f}% | PAT Growth: {s['pat_growth']:.1f}%\n"
+            msg += f"   EBITDA Margin: {s['ebitda_margin']:.1f}% | PAT Margin: {s['pat_margin']:.1f}%\n"
             if s.get('cmp', 0) > 0:
-                msg += f"   💰 CMP: ₹{s['cmp']:,.2f}\n"
+                msg += f"   CMP: Rs.{s['cmp']:,.2f}\n"
             if s.get('price_return') is not None:
-                msg += f"   📈 Price Return (5d): {s['price_return']:.1f}%\n"
+                msg += f"   Price Return (5d): {s['price_return']:.1f}%\n"
             msg += "\n"
         send_telegram_alert(msg)
-        print("\n" + "="*50 + "\n📢 ALERT:\n" + msg + "="*50)
+        print("\n" + "="*50 + "\n[PEAD] ALERT:\n" + msg + "="*50)
     else:
-        print("ℹ️ No fresh candidates found.")
+        print("[PEAD] No fresh candidates found.")
 
-    print(f"✅ Cycle complete. Total processed in state: {len(get_processed_ids())}")
+    print(f"[PEAD] Cycle complete. Total processed in state: {len(get_processed_ids())}")
 
 # ---------- Command-line ----------
 if __name__ == "__main__":
