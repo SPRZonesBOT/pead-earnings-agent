@@ -1,0 +1,1118 @@
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\scheduler.py", line 46, in <module>
+    print("\U0001f680 PEAD Scheduler started.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f680' in position 0: character maps to <undefined>
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\scheduler.py", line 46, in <module>
+    print("\U0001f680 PEAD Scheduler started.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f680' in position 0: character maps to <undefined>
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\scheduler.py", line 46, in <module>
+    print("\U0001f680 PEAD Scheduler started.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f680' in position 0: character maps to <undefined>
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+INFO:apscheduler.scheduler:Added job "run_pead_cycle" to job store "default"
+INFO:apscheduler.scheduler:Added job "run_pead_cycle" to job store "default"
+INFO:apscheduler.scheduler:Added job "run_pead_cycle" to job store "default"
+INFO:apscheduler.scheduler:Added job "<lambda>" to job store "default"
+INFO:apscheduler.scheduler:Scheduler started
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9', minute='15'], next run at: 2026-06-24 09:15:00 IST)" (scheduled at 2026-06-24 09:15:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9', minute='15'], next run at: 2026-06-25 09:15:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-24 10:00:00 IST)" (scheduled at 2026-06-24 09:30:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-24 10:00:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-24 10:30:00 IST)" (scheduled at 2026-06-24 10:00:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-24 10:30:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-24 11:00:00 IST)" (scheduled at 2026-06-24 10:30:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-24 11:00:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-24 11:30:00 IST)" (scheduled at 2026-06-24 11:00:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-24 11:30:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-24 12:00:00 IST)" (scheduled at 2026-06-24 11:30:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-24 12:00:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-24 12:30:00 IST)" (scheduled at 2026-06-24 12:00:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-24 12:30:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-24 13:00:00 IST)" (scheduled at 2026-06-24 12:30:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-24 13:00:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-24 13:30:00 IST)" (scheduled at 2026-06-24 13:00:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-24 13:30:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-24 14:00:00 IST)" (scheduled at 2026-06-24 13:30:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-24 14:00:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-24 14:30:00 IST)" (scheduled at 2026-06-24 14:00:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-24 14:30:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-24 15:00:00 IST)" (scheduled at 2026-06-24 14:30:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-24 15:00:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-24 15:30:00 IST)" (scheduled at 2026-06-24 15:00:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-24 15:30:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 09:00:00 IST)" (scheduled at 2026-06-24 15:30:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 09:00:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+WARNING:apscheduler.executors.default:Run time of job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='16', minute='30'], next run at: 2026-06-25 16:30:00 IST)" was missed by 0:06:09.708681
+INFO:apscheduler.executors.default:Running job "<lambda> (trigger: cron[day_of_week='mon-fri', hour='16', minute='45'], next run at: 2026-06-25 16:45:00 IST)" (scheduled at 2026-06-24 16:45:00+05:30)
+INFO:apscheduler.scheduler:Scheduler has been shut down
+INFO:apscheduler.executors.default:Job "<lambda> (trigger: cron[day_of_week='mon-fri', hour='16', minute='45'], next run at: 2026-06-25 16:45:00 IST)" executed successfully
+[PEAD] Scheduler started.
+   - Quick scan (Nifty 50) every 30 min during market hours
+   - Full scan (280 stocks) at 4:30 PM daily
+   - Full scan with reset at market open (9:15 AM)
+   - Auto-shutdown at 4:45 PM IST
+Press Ctrl+C to stop manually.
+[PEAD] State reset.
+
+[PEAD] Agent (Scan: FULL)
+[PEAD] 2026-06-24 09:15:00
+--------------------------------------------------
+[PEAD] Screener.in (full)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-24 09:30:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-24 10:00:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-24 10:30:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-24 11:00:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-24 11:30:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-24 12:00:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-24 12:30:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-24 13:00:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-24 13:30:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-24 14:00:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-24 14:30:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-24 15:00:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-24 15:30:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+INFO:apscheduler.scheduler:Adding job tentatively -- it will be properly scheduled when the scheduler starts
+INFO:apscheduler.scheduler:Added job "run_pead_cycle" to job store "default"
+INFO:apscheduler.scheduler:Added job "run_pead_cycle" to job store "default"
+INFO:apscheduler.scheduler:Added job "run_pead_cycle" to job store "default"
+INFO:apscheduler.scheduler:Added job "<lambda>" to job store "default"
+INFO:apscheduler.scheduler:Scheduler started
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9', minute='15'], next run at: 2026-06-25 09:15:00 IST)" (scheduled at 2026-06-25 09:15:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9', minute='15'], next run at: 2026-06-26 09:15:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 10:00:00 IST)" (scheduled at 2026-06-25 09:30:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 10:00:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 10:30:00 IST)" (scheduled at 2026-06-25 10:00:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 10:30:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 11:00:00 IST)" (scheduled at 2026-06-25 10:30:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 11:00:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 11:30:00 IST)" (scheduled at 2026-06-25 11:00:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 11:30:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 12:00:00 IST)" (scheduled at 2026-06-25 11:30:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 12:00:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 12:30:00 IST)" (scheduled at 2026-06-25 12:00:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 12:30:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 13:00:00 IST)" (scheduled at 2026-06-25 12:30:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 13:00:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 13:30:00 IST)" (scheduled at 2026-06-25 13:00:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 13:30:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 14:00:00 IST)" (scheduled at 2026-06-25 13:30:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 14:00:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 14:30:00 IST)" (scheduled at 2026-06-25 14:00:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 14:30:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 15:00:00 IST)" (scheduled at 2026-06-25 14:30:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 15:00:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 15:30:00 IST)" (scheduled at 2026-06-25 15:00:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-25 15:30:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-26 09:00:00 IST)" (scheduled at 2026-06-25 15:30:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='9-15', minute='*/30'], next run at: 2026-06-26 09:00:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='16', minute='30'], next run at: 2026-06-26 16:30:00 IST)" (scheduled at 2026-06-25 16:30:00+05:30)
+ERROR:apscheduler.executors.default:Job "run_pead_cycle (trigger: cron[day_of_week='mon-fri', hour='16', minute='30'], next run at: 2026-06-26 16:30:00 IST)" raised an exception
+Traceback (most recent call last):
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 24, in _load_weights
+    print("\u2705 Loaded Quantum-Optimized Weights.")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2705' in position 0: character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\apscheduler\executors\base.py", line 131, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\main.py", line 121, in run_pead_cycle
+    scorer = QuantumScorer(lookback=50)
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 18, in __init__
+    self.weights = self._load_weights()
+                   ~~~~~~~~~~~~~~~~~~^^
+  File "G:\SPRZones\GitHub\pead-earnings-agent\analysis\quantum_scoring.py", line 27, in _load_weights
+    print("\u26a0\ufe0f Using default weights (weights.json not found).")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: character maps to <undefined>
+INFO:apscheduler.executors.default:Running job "<lambda> (trigger: cron[day_of_week='mon-fri', hour='16', minute='45'], next run at: 2026-06-26 16:45:00 IST)" (scheduled at 2026-06-25 16:45:00+05:30)
+INFO:apscheduler.scheduler:Scheduler has been shut down
+INFO:apscheduler.executors.default:Job "<lambda> (trigger: cron[day_of_week='mon-fri', hour='16', minute='45'], next run at: 2026-06-26 16:45:00 IST)" executed successfully
+[PEAD] Scheduler started.
+   - Quick scan (Nifty 50) every 30 min during market hours
+   - Full scan (280 stocks) at 4:30 PM daily
+   - Full scan with reset at market open (9:15 AM)
+   - Auto-shutdown at 4:45 PM IST
+Press Ctrl+C to stop manually.
+
+[PEAD] Agent (Scan: FULL)
+[PEAD] 2026-06-25 09:15:00
+--------------------------------------------------
+[PEAD] Screener.in (full)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-25 09:30:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-25 10:00:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-25 10:30:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-25 11:00:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-25 11:30:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-25 12:00:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-25 12:30:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-25 13:00:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-25 13:30:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-25 14:00:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-25 14:30:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-25 15:00:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: QUICK)
+[PEAD] 2026-06-25 15:30:00
+--------------------------------------------------
+[PEAD] Screener.in (quick)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
+
+[PEAD] Agent (Scan: FULL)
+[PEAD] 2026-06-25 16:30:00
+--------------------------------------------------
+[PEAD] Screener.in (full)...
+[PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
+[PEAD] No data from Screener, trying fallback...
+[PEAD] Using MOCK data.
