@@ -1,44 +1,56 @@
-name: PEAD Agent Scheduler
+# scheduler.py
+from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.triggers.cron import CronTrigger
+import logging
+from main import run_pead_cycle
 
-on:
-  schedule:
-    # Quick Scan: Har 30 min during market hours (IST 9:15 AM to 3:15 PM)
-    - cron: '15 3,4,5,6,7,8,9 * * 1-5'
-    - cron: '45 3,4,5,6,7,8 * * 1-5'
-    # Full Scan: Daily at 4:30 PM IST (11:00 UTC)
-    - cron: '0 11 * * 1-5'
-  workflow_dispatch:
+logging.basicConfig(level=logging.INFO)
 
-jobs:
-  run-pead:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+sched = BlockingScheduler()
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
+# Quick scan every 30 min during market hours (IST 9:15 to 15:15)
+sched.add_job(
+    run_pead_cycle,
+    trigger=CronTrigger(day_of_week='mon-fri', hour='9-15', minute='*/30'),
+    id='quick_scan',
+    replace_existing=True,
+    kwargs={'reset': False, 'scan_mode': 'quick'}
+)
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        # Explicitly install scipy if requirements.txt doesn't have it
-        pip install scipy
+# Full scan at 16:30 IST (after market close)
+sched.add_job(
+    run_pead_cycle,
+    trigger=CronTrigger(day_of_week='mon-fri', hour=16, minute=30),
+    id='full_scan',
+    replace_existing=True,
+    kwargs={'reset': False, 'scan_mode': 'full'}
+)
 
-    - name: Run PEAD Quick Scan
-      if: github.event.schedule == '15 3,4,5,6,7,8,9 * * 1-5' || github.event.schedule == '45 3,4,5,6,7,8 * * 1-5'
-      run: python main.py --scan-mode quick
-      env:
-        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+# Full scan with reset at market open (9:15)
+sched.add_job(
+    run_pead_cycle,
+    trigger=CronTrigger(day_of_week='mon-fri', hour=9, minute=15),
+    id='full_reset',
+    replace_existing=True,
+    kwargs={'reset': True, 'scan_mode': 'full'}
+)
 
-    - name: Run PEAD Full Scan
-      if: github.event.schedule == '0 11 * * 1-5'
-      run: python main.py --scan-mode full
-      env:
-        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+# Auto-shutdown at 16:45 IST
+sched.add_job(
+    lambda: sched.shutdown(wait=False),
+    trigger=CronTrigger(day_of_week='mon-fri', hour=16, minute=45),
+    id='shutdown',
+    replace_existing=True
+)
+
+print("[PEAD] Scheduler started.")
+print("   - Quick scan (Nifty 50) every 30 min during market hours")
+print("   - Full scan (280 stocks) at 4:30 PM daily")
+print("   - Full scan with reset at market open (9:15 AM)")
+print("   - Auto-shutdown at 4:45 PM IST")
+print("Press Ctrl+C to stop manually.")
+
+try:
+    sched.start()
+except (KeyboardInterrupt, SystemExit):
+    print("[PEAD] Scheduler stopped.")
