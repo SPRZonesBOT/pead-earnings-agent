@@ -1116,3 +1116,7 @@ Press Ctrl+C to stop manually.
 [PEAD] Screener error: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>
 [PEAD] No data from Screener, trying fallback...
 [PEAD] Using MOCK data.
+  File "G:\SPRZones\GitHub\pead-earnings-agent\scheduler.py", line 1
+    name: PEAD Agent Scheduler
+               ^^^^^
+SyntaxError: invalid syntax
